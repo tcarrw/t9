@@ -182,10 +182,20 @@ footer{
   font-size:12px;
   color:var(--muted);
   margin-top:20px;
-  opacity:0.7;
+  opacity:0.8;
 }
-footer a{color:var(--accent);text-decoration:none;}
+footer a{
+  color:var(--accent);
+  text-decoration:none;
+}
 footer a:hover{text-decoration:underline;}
+.grounding{
+  margin-top:4px;
+  font-size:12px;
+  color:var(--ink);
+  opacity:0.6;
+  letter-spacing:0.5px;
+}
 .highlight{
   background:rgba(196,181,253,0.2);
   border-radius:8px;
@@ -238,7 +248,8 @@ footer a:hover{text-decoration:underline;}
 </div>
 
 <footer>
-  © PLNT Earth — <a href="https://plnt.earth" target="_blank">plnt.earth</a>
+  © PLNT Earth — <a href="https://earth.plnt.earth" target="_blank">earth.plnt.earth</a>
+  <div class="grounding">This page returns to ground.</div>
 </footer>
 
 <script src="https://www.youtube.com/iframe_api"></script>
@@ -246,24 +257,20 @@ footer a:hover{text-decoration:underline;}
 let player;
 function onYouTubeIframeAPIReady(){
   player=new YT.Player('player',{
-    events:{
-      'onStateChange':onPlayerStateChange
-    }
+    events:{'onStateChange':onPlayerStateChange}
   });
 }
 const dedication=document.getElementById('dedication');
 let loopEnabled=false, muted=false;
 document.getElementById('playBtn').onclick=()=>player.playVideo();
-document.getElementById('loopBtn').onclick=()=>{loopEnabled=!loopEnabled;player.setLoop(loopEnabled?1:0);};
-document.getElementById('muteBtn').onclick=()=>{muted=!muted;player.mute();if(!muted)player.unMute();};
+document.getElementById('loopBtn').onclick=()=>{loopEnabled=!loopEnabled;};
+document.getElementById('muteBtn').onclick=()=>{muted=!muted;muted?player.mute():player.unMute();};
 function onPlayerStateChange(e){
-  if(e.data===YT.PlayerState.PLAYING){
-    dedication.style.opacity=1;
-  }
+  if(e.data===YT.PlayerState.PLAYING){dedication.style.opacity=1;}
   if(e.data===YT.PlayerState.ENDED&&loopEnabled){player.playVideo();}
 }
 
-/* --- T9 Core (unchanged except highlight 4562) --- */
+/* --- T9 core --- */
 const display=document.getElementById('display');
 const output=document.getElementById('output');
 const breadcrumb=document.getElementById('breadcrumb');
@@ -292,19 +299,15 @@ function translate(){
   const val=display.value.toUpperCase();
   localStorage.setItem('t9input',display.value);
   if(val.includes('4562')){
-    output.innerHTML='<div class="highlight">✨ 4562 → ILMC · <a href="#" style="color:var(--accent);text-decoration:none;">Hyperion</a></div>';
-  }
-  if(mode==='encode'){
+    output.innerHTML='<div class="highlight">✨ 4562 → ILMC · <span>Hyperion</span></div>';
+  } else if(mode==='encode'){
     let res='';for(const ch of val){res+=letterToNum[ch]||ch;}
-    output.textContent=res;
-    if(val.includes('4562'))output.innerHTML+='';
-    breadcrumb.textContent='';
-  }else{
+    output.textContent=res;breadcrumb.textContent='';
+  } else {
     let combos=[''];for(const digit of val){const letters=t9map[digit];if(!letters){for(let i in combos)combos[i]+=digit;continue;}
       const newCombos=[];for(const prefix of combos){for(const l of letters)newCombos.push(prefix+l);}combos=newCombos;if(combos.length>5000)break;}
     if(lockedPaths.length>0)combos=combos.filter(c=>c.startsWith(lockedPaths.join('')));
-    renderChoices(combos);
-    updateBreadcrumb();
+    renderChoices(combos);updateBreadcrumb();
   }
 }
 function renderChoices(list){
