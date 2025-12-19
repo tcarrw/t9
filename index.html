@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>T9 Translator · PLNT Earth</title>
 <meta name="theme-color" content="#0b0f19">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0b0f19;
@@ -19,20 +20,72 @@ html,body{
   background:var(--bg);
   color:var(--ink);
   font-family:system-ui,sans-serif;
-  height:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
 }
+#header{
+  width:100%;
+  max-width:640px;
+  margin:24px auto 0;
+  text-align:center;
+  padding:0 12px;
+}
+#dedication{
+  opacity:0;
+  font-family:'VT323', monospace;
+  font-size:20px;
+  color:var(--accent);
+  letter-spacing:1px;
+  animation:glitch 1.6s infinite;
+  text-shadow:1px 0 #f0f, -1px 0 #0ff;
+  transition:opacity 1.2s ease;
+}
+@keyframes glitch {
+  0%,100%{text-shadow:1px 0 #f0f,-1px 0 #0ff;}
+  20%{text-shadow:-2px 0 #0ff,2px 0 #f0f;}
+  40%{text-shadow:2px 0 #f0f,-2px 0 #0ff;}
+  60%{text-shadow:-1px 0 #0ff,1px 0 #f0f;}
+  80%{text-shadow:1px 0 #f0f,-1px 0 #0ff;}
+}
+.video-container{
+  position:relative;
+  width:100%;
+  padding-bottom:56.25%;
+  border-radius:16px;
+  overflow:hidden;
+  background:var(--card);
+  box-shadow:0 0 20px rgba(0,0,0,0.4);
+  margin:12px 0;
+}
+.video-container iframe{
+  position:absolute;
+  top:0;left:0;width:100%;height:100%;
+}
+.video-controls{
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  margin-bottom:24px;
+}
+.video-controls button{
+  background:rgba(255,255,255,0.08);
+  border:none;
+  color:var(--ink);
+  border-radius:8px;
+  padding:6px 12px;
+  cursor:pointer;
+  font-weight:600;
+  transition:background .2s;
+}
+.video-controls button:hover{background:var(--accent);color:var(--bg);}
 #app{
   background:var(--card);
   backdrop-filter:blur(12px);
   border-radius:24px;
   padding:24px;
-  width:320px;
+  width:340px;
   max-width:90%;
   text-align:center;
   box-shadow:0 0 30px rgba(0,0,0,0.4);
+  margin:0 auto 24px;
 }
 h1{
   font-size:18px;
@@ -47,7 +100,7 @@ h1{
   padding:8px 16px;
   font-weight:600;
   cursor:pointer;
-  margin-bottom:16px;
+  margin-bottom:12px;
 }
 #display{
   width:100%;
@@ -58,7 +111,13 @@ h1{
   color:var(--ink);
   font-size:16px;
   text-align:center;
-  margin-bottom:12px;
+  margin-bottom:8px;
+}
+#breadcrumb{
+  font-size:14px;
+  color:var(--accent);
+  min-height:22px;
+  margin-bottom:10px;
 }
 .pad{
   display:grid;
@@ -76,29 +135,35 @@ button.key{
   cursor:pointer;
   transition:background 0.2s,transform 0.1s;
 }
-button.key:active{
-  background:var(--accent);
-  color:var(--bg);
-  transform:scale(0.96);
-}
-.key span{
-  display:block;
-  font-size:12px;
-  color:var(--muted);
-}
+button.key:active{background:var(--accent);color:var(--bg);transform:scale(0.96);}
+.key span{display:block;font-size:12px;color:var(--muted);}
 #output{
   background:rgba(255,255,255,0.05);
   border-radius:8px;
   padding:10px;
   font-size:14px;
   color:var(--muted);
-  min-height:30px;
+  min-height:60px;
   margin-bottom:10px;
-  word-break:break-all;
+  word-break:break-word;
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  justify-content:center;
 }
+.choice{
+  background:rgba(255,255,255,0.08);
+  color:var(--ink);
+  padding:4px 8px;
+  border-radius:6px;
+  cursor:pointer;
+  transition:background 0.2s;
+}
+.choice:hover{background:var(--accent);color:var(--bg);}
 .controls{
   display:flex;
   justify-content:space-between;
+  margin-bottom:8px;
 }
 .controls button{
   flex:1;
@@ -111,17 +176,45 @@ button.key:active{
   cursor:pointer;
   font-weight:600;
 }
-.controls button:active{
-  background:var(--accent);
-  color:var(--bg);
+.controls button:active{background:var(--accent);color:var(--bg);}
+footer{
+  text-align:center;
+  font-size:12px;
+  color:var(--muted);
+  margin-top:20px;
+  opacity:0.7;
+}
+footer a{color:var(--accent);text-decoration:none;}
+footer a:hover{text-decoration:underline;}
+.highlight{
+  background:rgba(196,181,253,0.2);
+  border-radius:8px;
+  padding:4px 8px;
+  display:inline-block;
+  margin-top:8px;
+  font-size:13px;
+  color:var(--accent);
 }
 </style>
 </head>
 <body>
+<div id="header">
+  <div class="video-container">
+    <iframe id="player" src="https://www.youtube.com/embed/p2ZdeIKJA8c?enablejsapi=1&modestbranding=1&playsinline=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
+  <div class="video-controls">
+    <button id="playBtn">Play</button>
+    <button id="loopBtn">Loop</button>
+    <button id="muteBtn">Mute</button>
+  </div>
+  <div id="dedication">Dedicated to my computer and the Tower — Ninajirachi · infohazard</div>
+</div>
+
 <div id="app">
   <h1>T9 Translator · PLNT Earth</h1>
   <button id="modeToggle">Mode: Encode</button>
   <input id="display" placeholder="Type letters or tap numbers">
+  <div id="breadcrumb"></div>
   <div class="pad">
     <button class="key" data-num="1">1</button>
     <button class="key" data-num="2">2<span>ABC</span></button>
@@ -139,80 +232,94 @@ button.key:active{
   <div id="output"></div>
   <div class="controls">
     <button id="clearBtn">Clear</button>
+    <button id="undoBtn">Undo</button>
     <button id="copyBtn">Copy</button>
   </div>
 </div>
+
+<footer>
+  © PLNT Earth — <a href="https://plnt.earth" target="_blank">plnt.earth</a>
+</footer>
+
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
+let player;
+function onYouTubeIframeAPIReady(){
+  player=new YT.Player('player',{
+    events:{
+      'onStateChange':onPlayerStateChange
+    }
+  });
+}
+const dedication=document.getElementById('dedication');
+let loopEnabled=false, muted=false;
+document.getElementById('playBtn').onclick=()=>player.playVideo();
+document.getElementById('loopBtn').onclick=()=>{loopEnabled=!loopEnabled;player.setLoop(loopEnabled?1:0);};
+document.getElementById('muteBtn').onclick=()=>{muted=!muted;player.mute();if(!muted)player.unMute();};
+function onPlayerStateChange(e){
+  if(e.data===YT.PlayerState.PLAYING){
+    dedication.style.opacity=1;
+  }
+  if(e.data===YT.PlayerState.ENDED&&loopEnabled){player.playVideo();}
+}
+
+/* --- T9 Core (unchanged except highlight 4562) --- */
 const display=document.getElementById('display');
 const output=document.getElementById('output');
+const breadcrumb=document.getElementById('breadcrumb');
 const modeToggle=document.getElementById('modeToggle');
 const clearBtn=document.getElementById('clearBtn');
+const undoBtn=document.getElementById('undoBtn');
 const copyBtn=document.getElementById('copyBtn');
 const padKeys=document.querySelectorAll('.key');
 let mode=localStorage.getItem('t9mode')||'encode';
 let inputCache=localStorage.getItem('t9input')||'';
 display.value=inputCache;
+
+const t9map={2:['A','B','C'],3:['D','E','F'],4:['G','H','I'],5:['J','K','L'],6:['M','N','O'],7:['P','Q','R','S'],8:['T','U','V'],9:['W','X','Y','Z']};
+const letterToNum={};
+for(const [num,letters] of Object.entries(t9map)){for(const l of letters)letterToNum[l]=num;}
+let lockedPaths=[];
 updateModeText();
 translate();
 
-const t9map={
-  2:['A','B','C'],3:['D','E','F'],4:['G','H','I'],
-  5:['J','K','L'],6:['M','N','O'],
-  7:['P','Q','R','S'],8:['T','U','V'],9:['W','X','Y','Z']
-};
-const letterToNum={};
-for(const [num,letters] of Object.entries(t9map)){
-  for(const l of letters) letterToNum[l]=num;
-}
-
-function updateModeText(){
-  modeToggle.textContent='Mode: '+(mode==='encode'?'Encode':'Decode');
-}
+const dtmf={'1':[697,1209],'2':[697,1336],'3':[697,1477],'4':[770,1209],'5':[770,1336],'6':[770,1477],'7':[852,1209],'8':[852,1336],'9':[852,1477],'*':[941,1209],'0':[941,1336],'#':[941,1477]};
+let audioCtx=null;
+function playDTMF(key){if(!dtmf[key])return;if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();const[f1,f2]=dtmf[key];const o1=audioCtx.createOscillator(),o2=audioCtx.createOscillator(),g=audioCtx.createGain();o1.frequency.value=f1;o2.frequency.value=f2;g.gain.value=0.08;o1.connect(g);o2.connect(g);g.connect(audioCtx.destination);o1.start();o2.start();o1.stop(audioCtx.currentTime+0.12);o2.stop(audioCtx.currentTime+0.12);}
+function updateModeText(){modeToggle.textContent='Mode: '+(mode==='encode'?'Encode':'Decode');}
+function updateBreadcrumb(){breadcrumb.textContent=lockedPaths.length?lockedPaths.join(' → '):'';}
 function translate(){
   const val=display.value.toUpperCase();
-  if(mode==='encode'){
-    let res='';
-    for(const ch of val){
-      res+=letterToNum[ch]||ch;
-    }
-    output.textContent=res;
-  }else{
-    const combos=[''];
-    for(const digit of val){
-      const letters=t9map[digit];
-      if(!letters){for(let i in combos)combos[i]+=digit;continue;}
-      const newCombos=[];
-      for(const prefix of combos){
-        for(const l of letters)newCombos.push(prefix+l);
-      }
-      combos.splice(0,combos.length,...newCombos);
-      if(combos.length>1000)break;
-    }
-    output.textContent=combos.slice(0,50).join(' ');
-  }
   localStorage.setItem('t9input',display.value);
+  if(val.includes('4562')){
+    output.innerHTML='<div class="highlight">✨ 4562 → ILMC · <a href="#" style="color:var(--accent);text-decoration:none;">Hyperion</a></div>';
+  }
+  if(mode==='encode'){
+    let res='';for(const ch of val){res+=letterToNum[ch]||ch;}
+    output.textContent=res;
+    if(val.includes('4562'))output.innerHTML+='';
+    breadcrumb.textContent='';
+  }else{
+    let combos=[''];for(const digit of val){const letters=t9map[digit];if(!letters){for(let i in combos)combos[i]+=digit;continue;}
+      const newCombos=[];for(const prefix of combos){for(const l of letters)newCombos.push(prefix+l);}combos=newCombos;if(combos.length>5000)break;}
+    if(lockedPaths.length>0)combos=combos.filter(c=>c.startsWith(lockedPaths.join('')));
+    renderChoices(combos);
+    updateBreadcrumb();
+  }
 }
-modeToggle.onclick=()=>{
-  mode=mode==='encode'?'decode':'encode';
-  localStorage.setItem('t9mode',mode);
-  updateModeText();
-  translate();
-};
-display.oninput=translate;
-padKeys.forEach(btn=>{
-  btn.onclick=()=>{
-    display.value+=btn.dataset.num||'';
-    translate();
-  };
-});
-clearBtn.onclick=()=>{
-  display.value='';
-  output.textContent='';
-  localStorage.removeItem('t9input');
-};
-copyBtn.onclick=()=>{
-  navigator.clipboard.writeText(output.textContent);
-};
+function renderChoices(list){
+  if(display.value.includes('4562'))return;
+  output.innerHTML='';
+  if(list.length===0){output.textContent='(no results)';return;}
+  for(const item of list.slice(0,80)){const el=document.createElement('div');el.className='choice';el.textContent=item;el.onclick=()=>selectChoice(item);output.appendChild(el);}
+}
+function selectChoice(choice){const prefix=lockedPaths.join('');if(choice.startsWith(prefix)){const nextLetter=choice[prefix.length];if(nextLetter){lockedPaths.push(nextLetter);translate();}}}
+undoBtn.onclick=()=>{lockedPaths.pop();translate();};
+modeToggle.onclick=()=>{mode=mode==='encode'?'decode':'encode';localStorage.setItem('t9mode',mode);lockedPaths=[];breadcrumb.textContent='';translate();};
+display.oninput=()=>{lockedPaths=[];translate();};
+padKeys.forEach(btn=>{btn.onclick=()=>{const key=btn.dataset.num;playDTMF(key);display.value+=key||'';translate();};});
+clearBtn.onclick=()=>{display.value='';output.textContent='';lockedPaths=[];breadcrumb.textContent='';localStorage.removeItem('t9input');playDTMF('*');};
+copyBtn.onclick=()=>{let text='';if(mode==='encode')text=output.textContent;else{text=[...output.querySelectorAll('.choice')].map(c=>c.textContent).join(' ');}navigator.clipboard.writeText(text);playDTMF('#');};
 </script>
 </body>
 </html>
