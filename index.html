@@ -3,306 +3,216 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>T9 Path Translator · PLNT Earth</title>
-<meta name="description" content="Decode numeric sequences into linguistic, anchor, and path-based flows.">
+<title>T9 Translator · PLNT Earth</title>
 <meta name="theme-color" content="#0b0f19">
-
 <style>
 :root{
   --bg:#0b0f19;
-  --panel:#121829;
-  --ink:#e7e9f2;
-  --muted:#9aa3c7;
+  --ink:#e6e8ee;
+  --muted:#a3acc2;
+  --card:rgba(255,255,255,0.06);
   --accent:#c4b5fd;
-  --chip:#1a2040;
-  --fire:#ef4444;
-  --knife:#f59e0b;
-  --key:#22d3ee;
-  --map:#a78bfa;
 }
-
 html,body{
   margin:0;
+  padding:0;
   background:var(--bg);
   color:var(--ink);
-  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-}
-
-header{
-  padding:16px 20px;
-  border-bottom:1px solid rgba(255,255,255,0.08);
+  font-family:system-ui,sans-serif;
+  height:100%;
   display:flex;
-  justify-content:space-between;
   align-items:center;
+  justify-content:center;
 }
-
-main{
-  max-width:1100px;
-  margin:0 auto;
+#app{
+  background:var(--card);
+  backdrop-filter:blur(12px);
+  border-radius:24px;
   padding:24px;
+  width:320px;
+  max-width:90%;
+  text-align:center;
+  box-shadow:0 0 30px rgba(0,0,0,0.4);
 }
-
 h1{
-  font-size:22px;
-  margin:0 0 12px;
+  font-size:18px;
+  margin-bottom:12px;
+  color:var(--accent);
 }
-
-.panel{
-  background:var(--panel);
-  border-radius:12px;
-  padding:20px;
-  margin-top:20px;
+#modeToggle{
+  background:var(--accent);
+  color:var(--bg);
+  border:none;
+  border-radius:20px;
+  padding:8px 16px;
+  font-weight:600;
+  cursor:pointer;
+  margin-bottom:16px;
 }
-
-textarea,input,select{
+#display{
   width:100%;
-  background:#0e1324;
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:10px;
+  background:rgba(255,255,255,0.08);
+  border:none;
+  border-radius:8px;
   padding:12px;
   color:var(--ink);
-  font-size:14px;
+  font-size:16px;
+  text-align:center;
+  margin-bottom:12px;
 }
-
-textarea:focus,input:focus,select:focus{
-  outline:none;
-  border-color:var(--accent);
-}
-
-label{
-  display:block;
-  font-size:13px;
-  color:var(--muted);
-  margin-bottom:6px;
-}
-
-.controls{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:12px;
-  margin-top:12px;
-}
-
-button{
-  background:var(--chip);
-  color:var(--ink);
-  border:1px solid rgba(255,255,255,0.1);
-  border-radius:999px;
-  padding:8px 14px;
-  cursor:pointer;
-  font-size:13px;
-}
-
-button.primary{
-  background:var(--accent);
-  color:#0b0f19;
-  border:none;
-  font-weight:600;
-}
-
-.toggleRow{
+.pad{
   display:grid;
   grid-template-columns:repeat(3,1fr);
-  gap:10px;
+  gap:8px;
+  margin-bottom:12px;
 }
-
-.toggle{
-  background:#0e1324;
-  border-radius:10px;
-  padding:10px;
-  text-align:center;
+button.key{
+  background:rgba(255,255,255,0.1);
+  border:none;
+  border-radius:12px;
+  padding:16px 0;
+  color:var(--ink);
+  font-size:18px;
   cursor:pointer;
-  border:1px solid rgba(255,255,255,0.08);
-  font-size:13px;
+  transition:background 0.2s,transform 0.1s;
 }
-
-.toggle.active{
-  border-color:var(--accent);
-  background:var(--chip);
+button.key:active{
+  background:var(--accent);
+  color:var(--bg);
+  transform:scale(0.96);
 }
-
-.results{
-  margin-top:16px;
-  display:grid;
-  gap:12px;
-}
-
-.result{
-  background:#0e1324;
-  border-radius:10px;
-  padding:12px 14px;
-  font-size:14px;
-}
-
-.flow{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.flow span{
-  padding:6px 12px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:600;
-}
-
-.map{background:var(--map);color:#0b0f19}
-.fire{background:var(--fire)}
-.knife{background:var(--knife);color:#0b0f19}
-.key{background:var(--key);color:#0b0f19}
-
-footer{
-  margin-top:60px;
-  padding:32px 20px;
-  border-top:1px solid rgba(255,255,255,0.08);
-  text-align:center;
+.key span{
+  display:block;
   font-size:12px;
   color:var(--muted);
 }
-
-footer .earth{
-  font-size:28px;
-  display:block;
-  margin-bottom:8px;
+#output{
+  background:rgba(255,255,255,0.05);
+  border-radius:8px;
+  padding:10px;
+  font-size:14px;
+  color:var(--muted);
+  min-height:30px;
+  margin-bottom:10px;
+  word-break:break-all;
 }
-
-footer a{
-  color:var(--accent);
-  text-decoration:none;
+.controls{
+  display:flex;
+  justify-content:space-between;
+}
+.controls button{
+  flex:1;
+  margin:0 4px;
+  background:rgba(255,255,255,0.08);
+  border:none;
+  border-radius:8px;
+  padding:8px;
+  color:var(--ink);
+  cursor:pointer;
+  font-weight:600;
+}
+.controls button:active{
+  background:var(--accent);
+  color:var(--bg);
 }
 </style>
 </head>
-
 <body>
-
-<header>
-  <div>T9 Path Translator</div>
-  <div>plnt.earth</div>
-</header>
-
-<main>
-<h1>Decode Numeric Paths</h1>
-
-<div class="panel">
-  <label>Input Sequence</label>
-  <input id="input" placeholder="Example: 463">
-
-  <div class="toggleRow" style="margin-top:14px">
-    <div class="toggle active" id="tLing" onclick="toggleMode('ling')">Linguistic</div>
-    <div class="toggle active" id="tAnchor" onclick="toggleMode('anchor')">Anchor</div>
-    <div class="toggle active" id="tDialect" onclick="toggleMode('dialect')">Dialect</div>
+<div id="app">
+  <h1>T9 Translator · PLNT Earth</h1>
+  <button id="modeToggle">Mode: Encode</button>
+  <input id="display" placeholder="Type letters or tap numbers">
+  <div class="pad">
+    <button class="key" data-num="1">1</button>
+    <button class="key" data-num="2">2<span>ABC</span></button>
+    <button class="key" data-num="3">3<span>DEF</span></button>
+    <button class="key" data-num="4">4<span>GHI</span></button>
+    <button class="key" data-num="5">5<span>JKL</span></button>
+    <button class="key" data-num="6">6<span>MNO</span></button>
+    <button class="key" data-num="7">7<span>PQRS</span></button>
+    <button class="key" data-num="8">8<span>TUV</span></button>
+    <button class="key" data-num="9">9<span>WXYZ</span></button>
+    <button class="key" data-num="*">*</button>
+    <button class="key" data-num="0">0</button>
+    <button class="key" data-num="#">#</button>
   </div>
-
+  <div id="output"></div>
   <div class="controls">
-    <select id="dialect">
-      <option value="illumina">Illumina</option>
-      <option value="us">US</option>
-      <option value="au">AU</option>
-    </select>
-    <button class="primary" onclick="decode()">Decode</button>
-    <button onclick="clearAll()">Clear</button>
+    <button id="clearBtn">Clear</button>
+    <button id="copyBtn">Copy</button>
   </div>
-
-  <div id="output" class="results"></div>
 </div>
-
-<div class="panel">
-  <h1 style="font-size:18px">Custom Anchor–Digit Overlay</h1>
-  <textarea id="overlay" placeholder="Example:
-4=Ground|Dagny
-6=Motion|Miss Monique
-3=Structure|Taylor"></textarea>
-</div>
-
-</main>
-
-<footer>
-  <span class="earth">🌍</span>
-  <div>PLNT Earth</div>
-  <div>Map → Fire → Knife → Key</div>
-  <div style="margin-top:6px">
-    <a href="https://plnt.earth">plnt.earth</a>
-  </div>
-</footer>
-
 <script>
-const t9 = {
-  2:["a","b","c"],3:["d","e","f"],4:["g","h","i"],
-  5:["j","k","l"],6:["m","n","o"],
-  7:["p","q","r","s"],8:["t","u","v"],9:["w","x","y","z"]
+const display=document.getElementById('display');
+const output=document.getElementById('output');
+const modeToggle=document.getElementById('modeToggle');
+const clearBtn=document.getElementById('clearBtn');
+const copyBtn=document.getElementById('copyBtn');
+const padKeys=document.querySelectorAll('.key');
+let mode=localStorage.getItem('t9mode')||'encode';
+let inputCache=localStorage.getItem('t9input')||'';
+display.value=inputCache;
+updateModeText();
+translate();
+
+const t9map={
+  2:['A','B','C'],3:['D','E','F'],4:['G','H','I'],
+  5:['J','K','L'],6:['M','N','O'],
+  7:['P','Q','R','S'],8:['T','U','V'],9:['W','X','Y','Z']
 };
-
-let modes={ling:true,anchor:true,dialect:true};
-
-function toggleMode(m){
-  modes[m]=!modes[m];
-  document.getElementById("t"+m.charAt(0).toUpperCase()+m.slice(1)).classList.toggle("active");
+const letterToNum={};
+for(const [num,letters] of Object.entries(t9map)){
+  for(const l of letters) letterToNum[l]=num;
 }
 
-function parseOverlay(){
-  const lines=document.getElementById("overlay").value.split("\n");
-  const map={};
-  lines.forEach(l=>{
-    const [d,v]=l.split("=");
-    if(d&&v) map[d.trim()]=v.trim();
-  });
-  return map;
+function updateModeText(){
+  modeToggle.textContent='Mode: '+(mode==='encode'?'Encode':'Decode');
 }
-
-function decode(){
-  const out=document.getElementById("output");
-  out.innerHTML="";
-  const seq=document.getElementById("input").value.trim();
-  if(!seq) return;
-
-  const overlay=parseOverlay();
-
-  if(modes.ling){
-    const combos=[...seq].map(n=>t9[n]||[]).reduce((a,b)=>a.flatMap(d=>b.map(e=>d+e)));
-    out.appendChild(block("Linguistic", combos.slice(0,16).join(", ")));
+function translate(){
+  const val=display.value.toUpperCase();
+  if(mode==='encode'){
+    let res='';
+    for(const ch of val){
+      res+=letterToNum[ch]||ch;
+    }
+    output.textContent=res;
+  }else{
+    const combos=[''];
+    for(const digit of val){
+      const letters=t9map[digit];
+      if(!letters){for(let i in combos)combos[i]+=digit;continue;}
+      const newCombos=[];
+      for(const prefix of combos){
+        for(const l of letters)newCombos.push(prefix+l);
+      }
+      combos.splice(0,combos.length,...newCombos);
+      if(combos.length>1000)break;
+    }
+    output.textContent=combos.slice(0,50).join(' ');
   }
-
-  if(modes.anchor){
-    const anchors=[...seq].map(n=>overlay[n]||"—");
-    out.appendChild(block("Anchor Overlay", anchors.join(" → ")));
-  }
-
-  const flow=document.createElement("div");
-  flow.className="flow";
-  [...seq].forEach((_,i)=>{
-    const p=i===0?"map":i===1?"fire":i===2?"knife":"key";
-    const s=document.createElement("span");
-    s.className=p;
-    s.textContent=p.toUpperCase();
-    flow.appendChild(s);
-  });
-  out.appendChild(flow);
-
-  const url=new URL(location.href);
-  url.searchParams.set("q",seq);
-  history.replaceState({},'',url);
+  localStorage.setItem('t9input',display.value);
 }
-
-function block(title,content){
-  const d=document.createElement("div");
-  d.className="result";
-  d.innerHTML="<strong>"+title+"</strong><br>"+content;
-  return d;
-}
-
-function clearAll(){
-  document.getElementById("input").value="";
-  document.getElementById("output").innerHTML="";
-  history.replaceState({},'',location.pathname);
-}
-
-const params=new URLSearchParams(location.search);
-if(params.get("q")){
-  document.getElementById("input").value=params.get("q");
-  decode();
-}
+modeToggle.onclick=()=>{
+  mode=mode==='encode'?'decode':'encode';
+  localStorage.setItem('t9mode',mode);
+  updateModeText();
+  translate();
+};
+display.oninput=translate;
+padKeys.forEach(btn=>{
+  btn.onclick=()=>{
+    display.value+=btn.dataset.num||'';
+    translate();
+  };
+});
+clearBtn.onclick=()=>{
+  display.value='';
+  output.textContent='';
+  localStorage.removeItem('t9input');
+};
+copyBtn.onclick=()=>{
+  navigator.clipboard.writeText(output.textContent);
+};
 </script>
-
 </body>
 </html>
