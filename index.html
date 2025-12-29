@@ -357,7 +357,7 @@ for(const [num,letters] of Object.entries(t9map)){
   for(const l of letters)letterToNum[l]=num;
 }
 
-// DTMF tone map
+// DTMF tone map - standard phone dual-tone frequencies
 const dtmfMap={
   '1':[697,1209],'2':[697,1336],'3':[697,1477],
   '4':[770,1209],'5':[770,1336],'6':[770,1477],
@@ -405,29 +405,36 @@ renderHints();
 function playDTMF(key){
   if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
   if(!dtmfMap[key])return;
+  
   const[f1,f2]=dtmfMap[key];
   const o1=audioCtx.createOscillator();
   const o2=audioCtx.createOscillator();
   const g=audioCtx.createGain();
+  
   o1.frequency.value=f1;
   o2.frequency.value=f2;
-  g.gain.value=0.08;
+  o1.type='sine';
+  o2.type='sine';
+  g.gain.value=0.1;
+  
   o1.connect(g);
   o2.connect(g);
   g.connect(audioCtx.destination);
+  
   o1.start();
   o2.start();
-  o1.stop(audioCtx.currentTime+0.12);
-  o2.stop(audioCtx.currentTime+0.12);
+  o1.stop(audioCtx.currentTime+0.15);
+  o2.stop(audioCtx.currentTime+0.15);
 }
 
 function playBackgroundTone(freq){
   if(currentToneFreq===freq)return;
   stopBackgroundTone();
   if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  
   bgTone=audioCtx.createOscillator();
   const g=audioCtx.createGain();
-  g.gain.value=0.05;
+  g.gain.value=0.04;
   bgTone.type="sine";
   bgTone.frequency.value=freq;
   bgTone.connect(g);
