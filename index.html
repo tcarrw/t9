@@ -3,166 +3,337 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>T9 Translator · PLNT Earth</title>
-<meta name="theme-color" content="#0c0c12">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=VT323&display=swap" rel="stylesheet">
+<title>T9 Signal Terminal · PLNT Earth</title>
+<meta name="theme-color" content="#00e0c6">
 <style>
 :root{
-  --bg:#0c0c12;
-  --ink:#e9e7ff;
-  --accent:#b8d8ff;
-  --glass:rgba(255,255,255,0.06);
-  --soft:rgba(255,255,255,0.1);
-  --muted:#aab5d4;
+  --bg:#001616;
+  --panel:#0a2020;
+  --accent:#00e0c6;
+  --accent2:#5af;
+  --ink:#a8fff0;
+  --muted:#66b3a9;
+  --font:"VT323",monospace;
 }
-html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
-  font-family:'Inter',system-ui,-apple-system,sans-serif;}
-#header{width:100%;max-width:640px;margin:24px auto 0;text-align:center;padding:0 12px;}
-#dedication{
-  opacity:0;font-family:'VT323',monospace;font-size:20px;letter-spacing:1px;
-  color:var(--accent);text-shadow:1px 0 #f0f,-1px 0 #0ff;animation:glitch 1.6s infinite;
-  transition:opacity 1.6s ease;
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--font);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-height:100vh;
+  overflow-x:hidden;
+  padding:20px 12px;
 }
-@keyframes glitch{
-  0%,100%{text-shadow:1px 0 #f0f,-1px 0 #0ff;}
-  20%{text-shadow:-2px 0 #0ff,2px 0 #f0f;}
-  40%{text-shadow:2px 0 #f0f,-2px 0 #0ff;}
-  60%{text-shadow:-1px 0 #0ff,1px 0 #f0f;}
-  80%{text-shadow:1px 0 #f0f,-1px 0 #0ff;}
+header{
+  text-align:center;
+  padding:8px;
+  color:var(--accent);
+  font-size:24px;
+  letter-spacing:2px;
+  text-shadow:0 0 8px var(--accent2);
+  transition:all .6s ease;
+  margin-bottom:16px;
 }
-.video-container{position:relative;width:100%;padding-bottom:56.25%;
-  border-radius:16px;overflow:hidden;background:var(--glass);
-  box-shadow:0 0 24px rgba(184,216,255,0.15);margin:12px 0;backdrop-filter:blur(20px);}
-.video-container iframe{position:absolute;top:0;left:0;width:100%;height:100%;}
-.video-controls{display:flex;justify-content:center;gap:8px;margin-bottom:24px;}
-.video-controls button{
-  background:var(--glass);border:1px solid rgba(255,255,255,0.12);color:var(--ink);
-  border-radius:12px;padding:6px 14px;cursor:pointer;font-weight:600;transition:all .25s ease;
+#videoWrapper{
+  position:relative;
+  width:100%;
+  max-width:480px;
+  aspect-ratio:16/9;
+  border:2px solid var(--accent2);
+  box-shadow:0 0 12px rgba(85,170,255,0.3);
+  margin-bottom:16px;
+  cursor:pointer;
 }
-.video-controls button:hover{background:var(--soft);color:var(--accent);}
-#app{background:var(--glass);backdrop-filter:blur(20px);border-radius:24px;
-  padding:24px;width:340px;max-width:90%;text-align:center;
-  box-shadow:0 0 30px rgba(184,216,255,0.12);margin:0 auto 24px;}
-h1{font-size:18px;margin-bottom:12px;color:var(--accent);font-weight:600;letter-spacing:0.5px;}
-#modeToggle{background:var(--accent);color:var(--bg);border:none;border-radius:20px;
-  padding:8px 16px;font-weight:600;cursor:pointer;margin-bottom:12px;}
-#display{width:100%;background:rgba(255,255,255,0.08);border:none;border-radius:8px;
-  padding:12px;color:var(--ink);font-size:16px;text-align:center;margin-bottom:8px;}
-#breadcrumb{font-size:14px;color:var(--accent);min-height:22px;margin-bottom:10px;}
-.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
-button.key{background:var(--soft);border:none;border-radius:12px;padding:16px 0;
-  color:var(--ink);font-size:18px;cursor:pointer;
-  transition:background 0.2s,transform 0.1s,color 0.2s;}
-button.key:active{background:var(--accent);color:var(--bg);transform:scale(0.96);}
-.key span{display:block;font-size:12px;color:var(--muted);}
-#output{background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;font-size:14px;
-  color:var(--muted);min-height:60px;margin-bottom:10px;word-break:break-word;
-  display:flex;flex-wrap:wrap;gap:6px;justify-content:center;}
-.choice{background:rgba(255,255,255,0.08);color:var(--ink);
-  padding:4px 8px;border-radius:6px;cursor:pointer;transition:background 0.2s,color 0.2s;}
-.choice:hover{background:var(--accent);color:var(--bg);}
-.controls{display:flex;justify-content:space-between;margin-bottom:8px;}
-.controls button{flex:1;margin:0 4px;background:var(--soft);border:none;border-radius:8px;
-  padding:8px;color:var(--ink);cursor:pointer;font-weight:600;transition:background 0.25s,color 0.25s;}
-.controls button:hover{background:var(--accent);color:var(--bg);}
-.highlight{background:rgba(184,216,255,0.18);border-radius:8px;padding:4px 8px;
-  display:inline-block;margin-top:8px;font-size:13px;color:var(--accent);}
-#directory{margin-top:24px;background:var(--glass);padding:16px;border-radius:16px;}
-.entry{border-left:4px solid var(--accent);padding:8px 12px;margin:8px 0;text-align:left;}
-.entry a{color:var(--accent);text-decoration:none;font-size:13px;}
-.entry a:hover{text-decoration:underline;}
-#timeNav{text-align:center;margin:32px 0 8px;font-size:13px;color:var(--muted);}
-#timeNav a{color:var(--ink);text-decoration:none;opacity:0.7;margin:0 6px;transition:opacity 0.2s,color 0.2s;}
-#timeNav a:hover{opacity:1;color:var(--accent);}
-#timeNav .sep{opacity:0.5;}
-footer{text-align:center;font-size:12px;color:var(--muted);margin-top:4px;opacity:0.8;}
-footer a{color:var(--accent);text-decoration:none;}
-footer a:hover{text-decoration:underline;}
-.grounding{margin-top:4px;font-size:12px;color:var(--ink);opacity:0.6;letter-spacing:0.5px;}
+iframe{width:100%;height:100%;border:0;opacity:1;transition:opacity 0.6s;}
+iframe.fading{opacity:0;}
+.window{
+  background:var(--panel);
+  border:2px solid var(--accent2);
+  box-shadow:0 0 16px rgba(0,0,0,0.5);
+  padding:20px;
+  max-width:480px;
+  width:100%;
+  margin-bottom:24px;
+}
+.display{
+  background:#000;
+  color:var(--ink);
+  padding:12px;
+  border:2px inset var(--accent2);
+  font-size:22px;
+  text-align:center;
+  width:100%;
+  letter-spacing:3px;
+  margin-bottom:12px;
+}
+#modeToggle{
+  width:100%;
+  background:var(--accent);
+  color:#001616;
+  border:2px outset var(--accent2);
+  font-family:var(--font);
+  font-size:18px;
+  padding:10px;
+  cursor:pointer;
+  margin-bottom:12px;
+  font-weight:bold;
+}
+#modeToggle:active{border:2px inset var(--accent2);}
+#breadcrumb{
+  font-size:18px;
+  color:var(--accent2);
+  text-align:center;
+  margin-bottom:12px;
+  min-height:24px;
+  letter-spacing:1px;
+}
+.keypad{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-bottom:12px;
+}
+button.key{
+  background:#1b1f1f;
+  border:2px outset var(--accent2);
+  color:var(--ink);
+  font-family:var(--font);
+  font-size:20px;
+  padding:16px 0;
+  cursor:pointer;
+  transition:all 0.1s;
+}
+button.key:active{
+  border:2px inset var(--accent2);
+  background:#003;
+  transform:scale(0.95);
+}
+button.key small{
+  display:block;
+  font-size:12px;
+  color:var(--muted);
+  margin-top:2px;
+}
+#output{
+  background:#000;
+  border:2px inset var(--accent2);
+  font-size:15px;
+  color:var(--accent2);
+  margin-bottom:12px;
+  text-align:center;
+  min-height:60px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  justify-content:center;
+  align-items:center;
+  padding:8px;
+}
+.choice{
+  background:#1b1f1f;
+  color:var(--ink);
+  padding:6px 10px;
+  border:1px solid var(--accent2);
+  cursor:pointer;
+  font-size:15px;
+  transition:all 0.2s;
+}
+.choice:hover{
+  background:var(--accent);
+  color:#001616;
+}
+.controls{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+.controls button{
+  background:#1b1f1f;
+  border:2px outset var(--accent2);
+  color:var(--ink);
+  font-family:var(--font);
+  font-size:16px;
+  padding:10px;
+  cursor:pointer;
+  transition:all 0.1s;
+}
+.controls button:active{
+  border:2px inset var(--accent2);
+  background:#003;
+}
+.hints{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(80px,1fr));
+  gap:16px;
+  margin:24px auto;
+  max-width:480px;
+  width:100%;
+}
+.hint{
+  text-align:center;
+  transition:all 0.4s ease;
+}
+.hint .emoji{
+  font-size:48px;
+  opacity:0.3;
+  filter:grayscale(100%);
+  transition:opacity .4s,filter .4s,text-shadow .4s;
+}
+.hint.unlocked .emoji{
+  opacity:1;
+  filter:none;
+  text-shadow:0 0 12px var(--accent2);
+}
+.details{
+  margin-top:8px;
+  font-size:13px;
+  color:var(--accent2);
+  animation:fadeIn .6s ease forwards;
+}
+.details .title{
+  font-weight:bold;
+  margin-bottom:4px;
+}
+.details a{
+  color:var(--accent);
+  text-decoration:none;
+  font-size:11px;
+}
+.details a:hover{text-decoration:underline;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px);}to{opacity:1;transform:none;}}
+#directory{
+  margin-top:16px;
+  padding:12px;
+  border:2px solid var(--accent2);
+  background:#000;
+}
+.entry{
+  border-left:4px solid var(--accent);
+  padding:10px 12px;
+  margin:10px 0;
+  text-align:left;
+  background:var(--panel);
+  cursor:pointer;
+  transition:background 0.2s;
+}
+.entry:hover{
+  background:#1b3333;
+}
+.entry strong{font-size:15px;}
+.entry a{color:var(--accent2);text-decoration:none;font-size:12px;}
+.entry a:hover{color:var(--accent);}
+footer{
+  text-align:center;
+  font-size:13px;
+  color:var(--muted);
+  margin-top:32px;
+  opacity:0.7;
+}
+footer a{
+  color:var(--accent);
+  text-decoration:none;
+}
+footer a:hover{
+  text-decoration:underline;
+}
+body::after{
+  content:"";
+  position:fixed;inset:0;
+  background:repeating-linear-gradient(transparent 0 1px,rgba(0,255,255,0.03) 1px 2px);
+  pointer-events:none;
+  animation:flicker 1.5s infinite;
+}
+@keyframes flicker{50%{opacity:0.95;}100%{opacity:1;}}
 </style>
 </head>
 <body>
-<div id="header">
-  <div class="video-container">
-    <iframe id="player" src="https://www.youtube.com/embed/p2ZdeIKJA8c?enablejsapi=1&modestbranding=1&playsinline=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-  </div>
-  <div class="video-controls">
-    <button id="playBtn">Play</button>
-    <button id="loopBtn">Loop</button>
-    <button id="muteBtn">Mute</button>
-  </div>
-  <div id="dedication">Dedicated to my computer and the Tower — Ninajirachi · infohazard</div>
+
+<header id="header">T9 Signal Terminal · PLNT Earth</header>
+
+<div id="videoWrapper">
+  <iframe id="ytplayer" src="https://www.youtube.com/embed/p2ZdeIKJA8c?loop=1&playlist=p2ZdeIKJA8c&enablejsapi=1" 
+    allow="autoplay; encrypted-media" allowfullscreen></iframe>
 </div>
 
-<div id="app">
-  <h1>T9 Translator · PLNT Earth</h1>
-  <button id="modeToggle">Mode: Encode</button>
-  <input id="display" placeholder="Type letters or tap numbers">
+<div class="window">
+  <input class="display" id="display" placeholder="TYPE OR TAP">
+  <button id="modeToggle">MODE: ENCODE</button>
   <div id="breadcrumb"></div>
-  <div class="pad">
-    <button class="key" data-num="1">1</button>
-    <button class="key" data-num="2">2<span>ABC</span></button>
-    <button class="key" data-num="3">3<span>DEF</span></button>
-    <button class="key" data-num="4">4<span>GHI</span></button>
-    <button class="key" data-num="5">5<span>JKL</span></button>
-    <button class="key" data-num="6">6<span>MNO</span></button>
-    <button class="key" data-num="7">7<span>PQRS</span></button>
-    <button class="key" data-num="8">8<span>TUV</span></button>
-    <button class="key" data-num="9">9<span>WXYZ</span></button>
-    <button class="key" data-num="*">*</button>
-    <button class="key" data-num="0">0</button>
-    <button class="key" data-num="#">#</button>
-  </div>
+  <div class="keypad" id="pad"></div>
   <div id="output"></div>
   <div class="controls">
-    <button id="clearBtn">Clear</button>
-    <button id="undoBtn">Undo</button>
-    <button id="copyBtn">Copy</button>
+    <button id="clearBtn">CLEAR</button>
+    <button id="undoBtn">UNDO</button>
+    <button id="copyBtn">COPY</button>
   </div>
   <div id="directory"></div>
 </div>
 
-<nav id="timeNav">
-  <a href="https://time.plnt.earth" target="_blank">⏳ Time</a>
-  <span class="sep">·</span>
-  <a href="https://earth.plnt.earth" target="_blank">🌍 Earth</a>
-</nav>
+<div id="hints" class="hints"></div>
 
-<footer>
-  © PLNT Earth — <a href="https://earth.plnt.earth" target="_blank">earth.plnt.earth</a>
-  <div class="grounding">This page returns to ground.</div>
-</footer>
+<footer>© PLNT Earth · <a href="https://earth.plnt.earth" target="_blank">earth.plnt.earth</a> · This page returns to ground</footer>
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
-let player,audioCtx=null,loopEnabled=false,muted=false,osc128=null;
+let player,audioCtx=null,loopEnabled=true,bgTone=null,currentToneFreq=null;
+let currentVideoId='p2ZdeIKJA8c';
+let isPlaying=false;
+let lastMatchedCode=null;
+
 function onYouTubeIframeAPIReady(){
-  player=new YT.Player('player',{events:{'onStateChange':onPlayerStateChange}});
-}
-const dedication=document.getElementById('dedication');
-document.getElementById('playBtn').onclick=()=>player.playVideo();
-document.getElementById('loopBtn').onclick=()=>{loopEnabled=!loopEnabled;};
-document.getElementById('muteBtn').onclick=()=>{muted=!muted;muted?player.mute():player.unMute();};
-function onPlayerStateChange(e){
-  if(e.data===YT.PlayerState.PLAYING){dedication.style.opacity=1;}
-  if(e.data===YT.PlayerState.ENDED&&loopEnabled){player.playVideo();}
+  player=new YT.Player('ytplayer',{
+    events:{
+      'onReady':onPlayerReady,
+      'onStateChange':onPlayerStateChange
+    }
+  });
 }
 
+function onPlayerReady(){
+  // Video ready but paused by default
+}
+
+function onPlayerStateChange(e){
+  if(e.data===YT.PlayerState.PLAYING){
+    isPlaying=true;
+  }else if(e.data===YT.PlayerState.PAUSED||e.data===YT.PlayerState.ENDED){
+    isPlaying=false;
+  }
+  if(e.data===YT.PlayerState.ENDED&&loopEnabled){
+    player.playVideo();
+  }
+}
+
+// Tap to play/pause
+document.getElementById('videoWrapper').onclick=function(){
+  if(isPlaying){
+    player.pauseVideo();
+  }else{
+    player.playVideo();
+  }
+};
+
 const t9DirectoryData=[
-  {code:"627462",name:"Marina",color:"#b8a3ff",url:"https://key.plnt.earth",tone:333},
-  {code:"744743",name:"Sigrid",color:"#e9e7ff",url:"https://clarity.plnt.earth",tone:432},
-  {code:"32469",name:"Dagny",color:"#f2b6d8",url:"https://joy.plnt.earth",tone:272},
-  {code:"7227462",name:"Sabrina Carpenter",color:"#f5cc6e",url:"https://honey.plnt.earth",tone:160},
-  {code:"274262",name:"Ariana Grande",color:"#eaeaea",url:"https://air.plnt.earth",tone:288},
-  {code:"3825472",name:"Dua Lipa",color:"#e74b3c",url:"https://fire.plnt.earth",tone:216},
-  {code:"82956779438",name:"Taylor Swift",color:"#f6e7a5",url:"https://school.plnt.earth",tone:432},
-  {code:"64776664783",name:"Miss Monique",color:"#55f6e6",url:"https://motion.plnt.earth",tone:512},
-  {code:"3632444",name:"Doechii",color:"#ff4d8a",url:"https://fire.plnt.earth",tone:320},
-  {code:"287672",name:"AURORA",color:"#c3f0ff",url:"https://clarity.plnt.earth",tone:480},
-  {code:"868356",name:"Tove Lo",color:"#b03b6d",url:"https://dream.plnt.earth",tone:240},
-  {code:"7672542",name:"Rosalía",color:"#a0142b",url:"https://knife.plnt.earth",tone:333},
-  {code:"5467387",name:"Kim Petras",color:"#ff91c8",url:"https://mirror.plnt.earth",tone:384},
-  {code:"4562",name:"ILMC · Hyperion",color:"#b8d8ff",url:"https://4562.world",tone:128}
+  {code:"456836926678837",name:"Ninajirachi · I Love My Computer",emoji:"🗼",color:"#b8d8ff",url:"https://4562.world",tone:128,youtube:"RKybAhTw8iE",note:"🗼 Dedicated to my computer and the Tower"},
+  {code:"627462",name:"Marina · Immortal",emoji:"🦋",color:"#b8a3ff",url:"https://key.plnt.earth",tone:333,youtube:"dYGKxxTXqSs",note:"🦋 you are"},
+  {code:"744743",name:"Sigrid · A Driver Saved My Night",emoji:"🪼",color:"#e9e7ff",url:"https://garlic.plnt.earth",tone:128,youtube:"sDEltzoEfZs",note:"🪼 keep driving"},
+  {code:"32469",name:"Dagny · Brightsider",emoji:"🌸",color:"#f2b6d8",url:"https://dagny.plnt.earth",tone:272,youtube:"BskeuUMp_lo",note:"🌸 Green light on strawberry dreams"},
+  {code:"536395",name:"Kendyl · Four",emoji:"🖋️",color:"#4a5568",url:"https://four.plnt.earth",tone:256,youtube:"XzOvgu3GPwY",note:"🖋️ writing in the margins"},
+  {code:"7227462",name:"Sabrina Carpenter",emoji:"🍯",color:"#f5cc6e",url:"https://honey.plnt.earth",tone:160},
+  {code:"274262",name:"Ariana Grande",emoji:"💨",color:"#eaeaea",url:"https://air.plnt.earth",tone:288},
+  {code:"3825472",name:"Dua Lipa",emoji:"🔥",color:"#e74b3c",url:"https://fire.plnt.earth",tone:216},
+  {code:"82956779438",name:"Taylor Swift",emoji:"📚",color:"#f6e7a5",url:"https://school.plnt.earth",tone:432},
+  {code:"64776664783",name:"Miss Monique",emoji:"🌊",color:"#55f6e6",url:"https://motion.plnt.earth",tone:512},
+  {code:"3632444",name:"Doechii",emoji:"💥",color:"#ff4d8a",url:"https://fire.plnt.earth",tone:320},
+  {code:"287672",name:"AURORA",emoji:"❄️",color:"#c3f0ff",url:"https://clarity.plnt.earth",tone:480},
+  {code:"868356",name:"Tove Lo",emoji:"💜",color:"#b03b6d",url:"https://dream.plnt.earth",tone:240},
+  {code:"7672542",name:"Rosalía",emoji:"🗡️",color:"#a0142b",url:"https://knife.plnt.earth",tone:333},
+  {code:"5467387",name:"Kim Petras",emoji:"🪞",color:"#ff91c8",url:"https://mirror.plnt.earth",tone:384}
 ];
 
 const display=document.getElementById('display');
@@ -172,112 +343,340 @@ const modeToggle=document.getElementById('modeToggle');
 const clearBtn=document.getElementById('clearBtn');
 const undoBtn=document.getElementById('undoBtn');
 const copyBtn=document.getElementById('copyBtn');
-const padKeys=document.querySelectorAll('.key');
+const pad=document.getElementById('pad');
+const header=document.getElementById('header');
+const ytplayer=document.getElementById('ytplayer');
+
 let mode=localStorage.getItem('t9mode')||'encode';
 let inputCache=localStorage.getItem('t9input')||'';
 display.value=inputCache;
+
 const t9map={2:['A','B','C'],3:['D','E','F'],4:['G','H','I'],5:['J','K','L'],6:['M','N','O'],7:['P','Q','R','S'],8:['T','U','V'],9:['W','X','Y','Z']};
-const letterToNum={};for(const [num,letters] of Object.entries(t9map)){for(const l of letters)letterToNum[l]=num;}
+const letterToNum={};
+for(const [num,letters] of Object.entries(t9map)){
+  for(const l of letters)letterToNum[l]=num;
+}
+
+// DTMF tone map
+const dtmfMap={
+  '1':[697,1209],'2':[697,1336],'3':[697,1477],
+  '4':[770,1209],'5':[770,1336],'6':[770,1477],
+  '7':[852,1209],'8':[852,1336],'9':[852,1477],
+  '*':[941,1209],'0':[941,1336],'#':[941,1477]
+};
+
 let lockedPaths=[];
-updateModeText();translate();renderDirectory();
 
-function playDTMF(k){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-const map={'1':[697,1209],'2':[697,1336],'3':[697,1477],'4':[770,1209],'5':[770,1336],'6':[770,1477],'7':[852,1209],'8':[852,1336],'9':[852,1477],'*':[941,1209],'0':[941,1336],'#':[941,1477]};
-if(!map[k])return;const[f1,f2]=map[k];const o1=audioCtx.createOscillator(),o2=audioCtx.createOscillator(),g=audioCtx.createGain();
-o1.frequency.value=f1;o2.frequency.value=f2;g.gain.value=0.08;o1.connect(g);o2.connect(g);g.connect(audioCtx.destination);
-o1.start();o2.start();o1.stop(audioCtx.currentTime+0.12);o2.stop(audioCtx.currentTime+0.12);}
+// Build keypad
+for(let i=1;i<=9;i++){
+  const b=document.createElement('button');
+  b.className='key';
+  const letters=t9map[i];
+  if(letters) b.innerHTML=`${i}<br><small>${letters.join('')}</small>`;
+  else b.textContent=i;
+  b.onclick=()=>{playDTMF(i.toString());display.value+=i;translate();};
+  pad.appendChild(b);
+}
 
-function updateModeText(){modeToggle.textContent='Mode: '+(mode==='encode'?'Encode':'Decode');}
-function updateBreadcrumb(){breadcrumb.textContent=lockedPaths.length?lockedPaths.join(' → '):'';}
+const bStar=document.createElement('button');
+bStar.className='key';
+bStar.innerHTML='*';
+bStar.onclick=()=>{playDTMF('*');display.value+='*';translate();};
+pad.appendChild(bStar);
+
+const bZero=document.createElement('button');
+bZero.className='key';
+bZero.innerHTML='0<br><small>SPACE</small>';
+bZero.onclick=()=>{playDTMF('0');display.value+='0';translate();};
+pad.appendChild(bZero);
+
+const bHash=document.createElement('button');
+bHash.className='key';
+bHash.innerHTML='#';
+bHash.onclick=()=>{playDTMF('#');display.value+='#';translate();};
+pad.appendChild(bHash);
+
+updateModeText();
+cleanupDirectory();
+translate();
+renderDirectory();
+renderHints();
+
+function playDTMF(key){
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  if(!dtmfMap[key])return;
+  const[f1,f2]=dtmfMap[key];
+  const o1=audioCtx.createOscillator();
+  const o2=audioCtx.createOscillator();
+  const g=audioCtx.createGain();
+  o1.frequency.value=f1;
+  o2.frequency.value=f2;
+  g.gain.value=0.08;
+  o1.connect(g);
+  o2.connect(g);
+  g.connect(audioCtx.destination);
+  o1.start();
+  o2.start();
+  o1.stop(audioCtx.currentTime+0.12);
+  o2.stop(audioCtx.currentTime+0.12);
+}
+
+function playBackgroundTone(freq){
+  if(currentToneFreq===freq)return;
+  stopBackgroundTone();
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  bgTone=audioCtx.createOscillator();
+  const g=audioCtx.createGain();
+  g.gain.value=0.05;
+  bgTone.type="sine";
+  bgTone.frequency.value=freq;
+  bgTone.connect(g);
+  g.connect(audioCtx.destination);
+  bgTone.start();
+  currentToneFreq=freq;
+}
+
+function stopBackgroundTone(){
+  if(bgTone){
+    bgTone.stop();
+    bgTone.disconnect();
+    bgTone=null;
+    currentToneFreq=null;
+  }
+}
+
+function updateModeText(){
+  modeToggle.textContent='MODE: '+(mode==='encode'?'ENCODE':'DECODE');
+}
+
+function updateBreadcrumb(){
+  breadcrumb.textContent=lockedPaths.length?lockedPaths.join(' → '):'';
+}
+
+function setVideo(videoId){
+  if(currentVideoId===videoId)return;
+  currentVideoId=videoId;
+  ytplayer.classList.add('fading');
+  setTimeout(()=>{
+    ytplayer.src=`https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&enablejsapi=1`;
+    ytplayer.classList.remove('fading');
+  },600);
+}
+
+// Check if stored entry matches current data
+function entryIsValid(entry){
+  const current=t9DirectoryData.find(x=>x.code===entry.code);
+  if(!current)return false;
+  return current.name===entry.name && current.url===entry.url && current.tone===entry.tone;
+}
+
+// Clean up directory to only show valid entries
+function cleanupDirectory(){
+  const dir=JSON.parse(localStorage.getItem('t9directory')||'[]');
+  const validDir=dir.filter(entryIsValid);
+  localStorage.setItem('t9directory',JSON.stringify(validDir));
+  
+  const unlocked=JSON.parse(localStorage.getItem('unlockedCodes')||"[]");
+  const validCodes=unlocked.filter(code=>{
+    const entry=t9DirectoryData.find(x=>x.code===code);
+    return entry!==undefined;
+  });
+  localStorage.setItem('unlockedCodes',JSON.stringify(validCodes));
+}
 
 function translate(){
   const val=display.value.toUpperCase();
   localStorage.setItem('t9input',display.value);
+  
   const found=t9DirectoryData.find(x=>val===x.code);
   if(found){
-    output.innerHTML=`<div class="highlight">✨ ${found.code} → <a href="${found.url}" target="_blank" style="color:inherit;text-decoration:none;">${found.name}</a></div>`;
+    lastMatchedCode=val;
+    output.innerHTML=`<div style="color:${found.color};font-size:18px;font-weight:bold;">✨ ${found.code} → ${found.name}</div>`;
+    breadcrumb.textContent=found.note||'';
+    header.textContent=found.note||'T9 Signal Terminal · PLNT Earth';
     updateDirectory(found);
-
-    // --- 744743 resonance trigger ---
-    if(found.code==="744743"){
-      if(player && typeof player.loadVideoById==="function"){
-        player.loadVideoById("sDEltzoEfZs"); // Sigrid video ID
-        player.playVideo();
-        loopEnabled=true;
-      }
-      if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-      if(!osc128){
-        osc128=audioCtx.createOscillator();
-        const g=audioCtx.createGain();
-        g.gain.value=0.08;
-        osc128.type="sine";
-        osc128.frequency.value=128;
-        osc128.connect(g);
-        g.connect(audioCtx.destination);
-        osc128.start();
-      }
-    } else {
-      // stop tone if switching away
-      if(osc128){osc128.stop();osc128.disconnect();osc128=null;}
-      loopEnabled=false;
+    unlock(found.code);
+    
+    if(found.youtube){
+      setVideo(found.youtube);
+    }
+    
+    if(found.tone){
+      playBackgroundTone(found.tone);
     }
     return;
   }
+  
+  // If we had a match and now don't, reset to infohazard
+  if(lastMatchedCode!==null){
+    setVideo('p2ZdeIKJA8c');
+    lastMatchedCode=null;
+  }
+  
+  // If no match, stop tone
+  stopBackgroundTone();
+  if(val===''){
+    header.textContent='T9 Signal Terminal · PLNT Earth';
+    breadcrumb.textContent='';
+  }
 
   if(mode==='encode'){
-    let res='';for(const ch of val){res+=letterToNum[ch]||ch;}
-    output.textContent=res;breadcrumb.textContent='';
+    let res='';
+    for(const ch of val){
+      res+=letterToNum[ch]||ch;
+    }
+    output.textContent=res;
+    breadcrumb.textContent='';
   }else{
     let combos=[''];
     for(const d of val){
       const letters=t9map[d];
-      if(!letters){for(let i in combos)combos[i]+=d;continue;}
-      const newC=[];for(const p of combos){for(const l of letters)newC.push(p+l);}
-      combos=newC;if(combos.length>5000)break;
+      if(!letters){
+        for(let i in combos)combos[i]+=d;
+        continue;
+      }
+      const newC=[];
+      for(const p of combos){
+        for(const l of letters)newC.push(p+l);
+      }
+      combos=newC;
+      if(combos.length>5000)break;
     }
-    if(lockedPaths.length>0)combos=combos.filter(c=>c.startsWith(lockedPaths.join('')));
-    renderChoices(combos);updateBreadcrumb();
+    if(lockedPaths.length>0)
+      combos=combos.filter(c=>c.startsWith(lockedPaths.join('')));
+    renderChoices(combos);
+    updateBreadcrumb();
   }
 }
 
 function renderChoices(list){
   output.innerHTML='';
-  if(list.length===0){output.textContent='(no results)';return;}
+  if(list.length===0){
+    output.textContent='(no results)';
+    return;
+  }
   for(const item of list.slice(0,80)){
     const el=document.createElement('div');
-    el.className='choice';el.textContent=item;
+    el.className='choice';
+    el.textContent=item;
     el.onclick=()=>selectChoice(item);
     output.appendChild(el);
   }
 }
-function selectChoice(c){const p=lockedPaths.join('');if(c.startsWith(p)){const n=c[p.length];if(n){lockedPaths.push(n);translate();}}}
-undoBtn.onclick=()=>{lockedPaths.pop();translate();};
-modeToggle.onclick=()=>{mode=mode==='encode'?'decode':'encode';localStorage.setItem('t9mode',mode);lockedPaths=[];breadcrumb.textContent='';translate();};
-display.oninput=()=>{lockedPaths=[];translate();};
-padKeys.forEach(b=>{b.onclick=()=>{const k=b.dataset.num;playDTMF(k);display.value+=k||'';translate();};});
-clearBtn.onclick=()=>{display.value='';output.textContent='';lockedPaths=[];breadcrumb.textContent='';localStorage.removeItem('t9input');
-  playDTMF('*');
-  if(osc128){osc128.stop();osc128.disconnect();osc128=null;}
-  loopEnabled=false;
+
+function selectChoice(c){
+  const p=lockedPaths.join('');
+  if(c.startsWith(p)){
+    const n=c[p.length];
+    if(n){
+      lockedPaths.push(n);
+      translate();
+    }
+  }
+}
+
+undoBtn.onclick=()=>{
+  lockedPaths.pop();
+  translate();
 };
-copyBtn.onclick=()=>{let t='';if(mode==='encode')t=output.textContent;else{t=[...output.querySelectorAll('.choice')].map(c=>c.textContent).join(' ');}navigator.clipboard.writeText(t);playDTMF('#');};
+
+modeToggle.onclick=()=>{
+  mode=mode==='encode'?'decode':'encode';
+  localStorage.setItem('t9mode',mode);
+  lockedPaths=[];
+  breadcrumb.textContent='';
+  updateModeText();
+  translate();
+};
+
+display.oninput=()=>{
+  lockedPaths=[];
+  translate();
+};
+
+clearBtn.onclick=()=>{
+  display.value='';
+  output.textContent='';
+  lockedPaths=[];
+  breadcrumb.textContent='';
+  header.textContent='T9 Signal Terminal · PLNT Earth';
+  localStorage.removeItem('t9input');
+  playDTMF('*');
+  stopBackgroundTone();
+  lastMatchedCode=null;
+};
+
+copyBtn.onclick=()=>{
+  let t='';
+  if(mode==='encode'){
+    t=output.textContent;
+  }else{
+    t=[...output.querySelectorAll('.choice')].map(c=>c.textContent).join(' ');
+  }
+  navigator.clipboard.writeText(t);
+  playDTMF('#');
+};
 
 function updateDirectory(found){
   const dir=JSON.parse(localStorage.getItem('t9directory')||'[]');
-  if(!dir.find(e=>e.code===found.code)){dir.push(found);localStorage.setItem('t9directory',JSON.stringify(dir));}
+  const existingIndex=dir.findIndex(e=>e.code===found.code);
+  if(existingIndex>=0){
+    dir[existingIndex]=found;
+  }else{
+    dir.push(found);
+  }
+  localStorage.setItem('t9directory',JSON.stringify(dir));
   renderDirectory();
 }
+
+function playVideoForEntry(entry){
+  if(entry.youtube){
+    setVideo(entry.youtube);
+  }
+}
+
 function renderDirectory(){
   const dir=JSON.parse(localStorage.getItem('t9directory')||'[]');
   const c=document.getElementById('directory');
-  c.innerHTML='<h3 style="margin-top:0;color:var(--accent);font-size:15px;">Directory</h3>';
+  if(dir.length===0){
+    c.innerHTML='';
+    return;
+  }
+  c.innerHTML='<h3 style="margin:0 0 12px 0;color:var(--accent);font-size:16px;letter-spacing:1px;">DISCOVERED SIGNALS</h3>';
   for(const e of dir){
     const card=document.createElement('div');
     card.className='entry';
     card.style.borderColor=e.color;
-    card.innerHTML=`<strong>${e.name}</strong><br><span>${e.code}</span><br><a href="${e.url}" target="_blank">${e.url.replace('https://','')}</a><br><small>${e.tone} Hz</small>`;
+    card.onclick=()=>playVideoForEntry(e);
+    card.innerHTML=`<strong style="color:${e.color}">${e.emoji} ${e.name}</strong><br><span style="color:var(--accent2);font-size:13px;">${e.code}</span><br><a href="${e.url}" target="_blank" onclick="event.stopPropagation();">${e.url.replace('https://','')}</a><br><small style="color:var(--muted);">${e.tone} Hz</small>`;
     c.appendChild(card);
   }
+}
+
+function unlock(code){
+  let unlocked=JSON.parse(localStorage.getItem('unlockedCodes')||"[]");
+  if(!unlocked.includes(code)){
+    unlocked.push(code);
+    localStorage.setItem('unlockedCodes',JSON.stringify(unlocked));
+  }
+  renderHints();
+}
+
+function renderHints(){
+  const unlocked=JSON.parse(localStorage.getItem('unlockedCodes')||"[]");
+  const hints=t9DirectoryData.filter(d=>d.emoji);
+  const html=hints.map(h=>{
+    const open=unlocked.includes(h.code);
+    return `
+      <div class="hint ${open?'unlocked':''}">
+        <div class="emoji">${h.emoji}</div>
+        ${open?`<div class="details">
+          <div class="title">${h.name.split('·')[0].trim()}</div>
+          ${h.url?`<a href="${h.url}" target="_blank">↗ VISIT</a>`:''}
+        </div>`:''}
+      </div>`;
+  }).join('');
+  document.getElementById('hints').innerHTML=html;
 }
 </script>
 </body>
