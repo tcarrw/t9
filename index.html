@@ -666,7 +666,11 @@ function renderDirectory(){
     card.className='entry';
     card.style.borderColor=e.color;
     card.onclick=()=>playVideoForEntry(e);
-    card.innerHTML=`<strong style="color:${e.color}">${e.emoji} ${e.name}</strong><br><span style="color:var(--accent2);font-size:13px;">${e.code}</span><br><a href="${e.url}" target="_blank" onclick="event.stopPropagation();">${e.url.replace('https://','')}</a><br><small style="color:var(--muted);">${e.tone} Hz</small>`;
+    
+    // Use emoji from entry, or gift box if undefined
+    const displayEmoji = e.emoji || '🎁';
+    
+    card.innerHTML=`<strong style="color:${e.color}">${displayEmoji} ${e.name}</strong><br><span style="color:var(--accent2);font-size:13px;">${e.code}</span><br><a href="${e.url}" target="_blank" onclick="event.stopPropagation();">${e.url.replace('https://','')}</a><br><small style="color:var(--muted);">${e.tone} Hz</small>`;
     c.appendChild(card);
   }
 }
