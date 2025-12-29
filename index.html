@@ -4,22 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>T9 Translator · PLNT Earth</title>
-<meta name="theme-color" content="#0b0f19">
-<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#0c0c12">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0b0f19;
-  --ink:#e6e8ee;
-  --muted:#a3acc2;
-  --card:rgba(255,255,255,0.06);
-  --accent:#c4b5fd;
+  --bg:#0c0c12;
+  --ink:#e9e7ff;
+  --accent:#b8d8ff;
+  --glass:rgba(255,255,255,0.06);
+  --soft:rgba(255,255,255,0.1);
+  --muted:#aab5d4;
 }
 html,body{
-  margin:0;
-  padding:0;
+  margin:0;padding:0;
   background:var(--bg);
   color:var(--ink);
-  font-family:system-ui,sans-serif;
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
 }
 #header{
   width:100%;
@@ -30,20 +30,11 @@ html,body{
 }
 #dedication{
   opacity:0;
-  font-family:'VT323', monospace;
-  font-size:20px;
+  font-weight:500;
   color:var(--accent);
-  letter-spacing:1px;
-  animation:glitch 1.6s infinite;
-  text-shadow:1px 0 #f0f, -1px 0 #0ff;
-  transition:opacity 1.2s ease;
-}
-@keyframes glitch {
-  0%,100%{text-shadow:1px 0 #f0f,-1px 0 #0ff;}
-  20%{text-shadow:-2px 0 #0ff,2px 0 #f0f;}
-  40%{text-shadow:2px 0 #f0f,-2px 0 #0ff;}
-  60%{text-shadow:-1px 0 #0ff,1px 0 #f0f;}
-  80%{text-shadow:1px 0 #f0f,-1px 0 #0ff;}
+  letter-spacing:0.5px;
+  font-size:16px;
+  transition:opacity 1.6s ease;
 }
 .video-container{
   position:relative;
@@ -51,9 +42,10 @@ html,body{
   padding-bottom:56.25%;
   border-radius:16px;
   overflow:hidden;
-  background:var(--card);
-  box-shadow:0 0 20px rgba(0,0,0,0.4);
+  background:var(--glass);
+  box-shadow:0 0 24px rgba(184,216,255,0.15);
   margin:12px 0;
+  backdrop-filter:blur(20px);
 }
 .video-container iframe{
   position:absolute;
@@ -66,31 +58,36 @@ html,body{
   margin-bottom:24px;
 }
 .video-controls button{
-  background:rgba(255,255,255,0.08);
-  border:none;
+  background:var(--glass);
+  border:1px solid rgba(255,255,255,0.12);
   color:var(--ink);
-  border-radius:8px;
-  padding:6px 12px;
+  border-radius:12px;
+  padding:6px 14px;
   cursor:pointer;
   font-weight:600;
-  transition:background .2s;
+  transition:all .25s ease;
 }
-.video-controls button:hover{background:var(--accent);color:var(--bg);}
+.video-controls button:hover{
+  background:var(--soft);
+  color:var(--accent);
+}
 #app{
-  background:var(--card);
-  backdrop-filter:blur(12px);
+  background:var(--glass);
+  backdrop-filter:blur(20px);
   border-radius:24px;
   padding:24px;
   width:340px;
   max-width:90%;
   text-align:center;
-  box-shadow:0 0 30px rgba(0,0,0,0.4);
+  box-shadow:0 0 30px rgba(184,216,255,0.12);
   margin:0 auto 24px;
 }
 h1{
   font-size:18px;
   margin-bottom:12px;
   color:var(--accent);
+  font-weight:600;
+  letter-spacing:0.5px;
 }
 #modeToggle{
   background:var(--accent);
@@ -126,19 +123,27 @@ h1{
   margin-bottom:12px;
 }
 button.key{
-  background:rgba(255,255,255,0.1);
+  background:var(--soft);
   border:none;
   border-radius:12px;
   padding:16px 0;
   color:var(--ink);
   font-size:18px;
   cursor:pointer;
-  transition:background 0.2s,transform 0.1s;
+  transition:background 0.2s,transform 0.1s,color 0.2s;
 }
-button.key:active{background:var(--accent);color:var(--bg);transform:scale(0.96);}
-.key span{display:block;font-size:12px;color:var(--muted);}
+button.key:active{
+  background:var(--accent);
+  color:var(--bg);
+  transform:scale(0.96);
+}
+.key span{
+  display:block;
+  font-size:12px;
+  color:var(--muted);
+}
 #output{
-  background:rgba(255,255,255,0.05);
+  background:rgba(255,255,255,0.04);
   border-radius:8px;
   padding:10px;
   font-size:14px;
@@ -157,9 +162,12 @@ button.key:active{background:var(--accent);color:var(--bg);transform:scale(0.96)
   padding:4px 8px;
   border-radius:6px;
   cursor:pointer;
-  transition:background 0.2s;
+  transition:background 0.2s,color 0.2s;
 }
-.choice:hover{background:var(--accent);color:var(--bg);}
+.choice:hover{
+  background:var(--accent);
+  color:var(--bg);
+}
 .controls{
   display:flex;
   justify-content:space-between;
@@ -168,20 +176,44 @@ button.key:active{background:var(--accent);color:var(--bg);transform:scale(0.96)
 .controls button{
   flex:1;
   margin:0 4px;
-  background:rgba(255,255,255,0.08);
+  background:var(--soft);
   border:none;
   border-radius:8px;
   padding:8px;
   color:var(--ink);
   cursor:pointer;
   font-weight:600;
+  transition:background 0.25s,color 0.25s;
 }
-.controls button:active{background:var(--accent);color:var(--bg);}
+.controls button:hover{
+  background:var(--accent);
+  color:var(--bg);
+}
+#timeNav{
+  text-align:center;
+  margin:32px 0 8px;
+  font-size:13px;
+  color:var(--muted);
+}
+#timeNav a{
+  color:var(--ink);
+  text-decoration:none;
+  opacity:0.7;
+  margin:0 6px;
+  transition:opacity 0.2s,color 0.2s;
+}
+#timeNav a:hover{
+  opacity:1;
+  color:var(--accent);
+}
+#timeNav .sep{
+  opacity:0.5;
+}
 footer{
   text-align:center;
   font-size:12px;
   color:var(--muted);
-  margin-top:20px;
+  margin-top:4px;
   opacity:0.8;
 }
 footer a{
@@ -197,7 +229,7 @@ footer a:hover{text-decoration:underline;}
   letter-spacing:0.5px;
 }
 .highlight{
-  background:rgba(196,181,253,0.2);
+  background:rgba(184,216,255,0.18);
   border-radius:8px;
   padding:4px 8px;
   display:inline-block;
@@ -247,6 +279,12 @@ footer a:hover{text-decoration:underline;}
   </div>
 </div>
 
+<nav id="timeNav">
+  <a href="https://time.plnt.earth" target="_blank">⏳ Time</a>
+  <span class="sep">·</span>
+  <a href="https://earth.plnt.earth" target="_blank">🌍 Earth</a>
+</nav>
+
 <footer>
   © PLNT Earth — <a href="https://earth.plnt.earth" target="_blank">earth.plnt.earth</a>
   <div class="grounding">This page returns to ground.</div>
@@ -256,9 +294,7 @@ footer a:hover{text-decoration:underline;}
 <script>
 let player;
 function onYouTubeIframeAPIReady(){
-  player=new YT.Player('player',{
-    events:{'onStateChange':onPlayerStateChange}
-  });
+  player=new YT.Player('player',{events:{'onStateChange':onPlayerStateChange}});
 }
 const dedication=document.getElementById('dedication');
 let loopEnabled=false, muted=false;
@@ -292,20 +328,34 @@ translate();
 
 const dtmf={'1':[697,1209],'2':[697,1336],'3':[697,1477],'4':[770,1209],'5':[770,1336],'6':[770,1477],'7':[852,1209],'8':[852,1336],'9':[852,1477],'*':[941,1209],'0':[941,1336],'#':[941,1477]};
 let audioCtx=null;
-function playDTMF(key){if(!dtmf[key])return;if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();const[f1,f2]=dtmf[key];const o1=audioCtx.createOscillator(),o2=audioCtx.createOscillator(),g=audioCtx.createGain();o1.frequency.value=f1;o2.frequency.value=f2;g.gain.value=0.08;o1.connect(g);o2.connect(g);g.connect(audioCtx.destination);o1.start();o2.start();o1.stop(audioCtx.currentTime+0.12);o2.stop(audioCtx.currentTime+0.12);}
+function playDTMF(key){
+  if(!dtmf[key])return;
+  if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  const[f1,f2]=dtmf[key];
+  const o1=audioCtx.createOscillator(),o2=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o1.frequency.value=f1;o2.frequency.value=f2;g.gain.value=0.08;
+  o1.connect(g);o2.connect(g);g.connect(audioCtx.destination);
+  o1.start();o2.start();o1.stop(audioCtx.currentTime+0.12);o2.stop(audioCtx.currentTime+0.12);
+}
 function updateModeText(){modeToggle.textContent='Mode: '+(mode==='encode'?'Encode':'Decode');}
 function updateBreadcrumb(){breadcrumb.textContent=lockedPaths.length?lockedPaths.join(' → '):'';}
 function translate(){
   const val=display.value.toUpperCase();
   localStorage.setItem('t9input',display.value);
   if(val.includes('4562')){
-    output.innerHTML='<div class="highlight">✨ 4562 → ILMC · <span>Hyperion</span></div>';
+    output.innerHTML='<div class="highlight">✨ 4562 → <a href="https://4562.world" target="_blank" style="color:inherit;text-decoration:none;">ILMC · Hyperion</a></div>';
   } else if(mode==='encode'){
     let res='';for(const ch of val){res+=letterToNum[ch]||ch;}
     output.textContent=res;breadcrumb.textContent='';
   } else {
-    let combos=[''];for(const digit of val){const letters=t9map[digit];if(!letters){for(let i in combos)combos[i]+=digit;continue;}
-      const newCombos=[];for(const prefix of combos){for(const l of letters)newCombos.push(prefix+l);}combos=newCombos;if(combos.length>5000)break;}
+    let combos=[''];
+    for(const digit of val){
+      const letters=t9map[digit];
+      if(!letters){for(let i in combos)combos[i]+=digit;continue;}
+      const newCombos=[];
+      for(const prefix of combos){for(const l of letters)newCombos.push(prefix+l);}
+      combos=newCombos;if(combos.length>5000)break;
+    }
     if(lockedPaths.length>0)combos=combos.filter(c=>c.startsWith(lockedPaths.join('')));
     renderChoices(combos);updateBreadcrumb();
   }
@@ -314,9 +364,20 @@ function renderChoices(list){
   if(display.value.includes('4562'))return;
   output.innerHTML='';
   if(list.length===0){output.textContent='(no results)';return;}
-  for(const item of list.slice(0,80)){const el=document.createElement('div');el.className='choice';el.textContent=item;el.onclick=()=>selectChoice(item);output.appendChild(el);}
+  for(const item of list.slice(0,80)){
+    const el=document.createElement('div');
+    el.className='choice';el.textContent=item;
+    el.onclick=()=>selectChoice(item);
+    output.appendChild(el);
+  }
 }
-function selectChoice(choice){const prefix=lockedPaths.join('');if(choice.startsWith(prefix)){const nextLetter=choice[prefix.length];if(nextLetter){lockedPaths.push(nextLetter);translate();}}}
+function selectChoice(choice){
+  const prefix=lockedPaths.join('');
+  if(choice.startsWith(prefix)){
+    const nextLetter=choice[prefix.length];
+    if(nextLetter){lockedPaths.push(nextLetter);translate();}
+  }
+}
 undoBtn.onclick=()=>{lockedPaths.pop();translate();};
 modeToggle.onclick=()=>{mode=mode==='encode'?'decode':'encode';localStorage.setItem('t9mode',mode);lockedPaths=[];breadcrumb.textContent='';translate();};
 display.oninput=()=>{lockedPaths=[];translate();};
