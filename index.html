@@ -465,19 +465,37 @@ function setVideo(videoId){
 
 // Check if stored entry matches current data
 function entryIsValid(entry){
+  // Check if entry has required fields
+  if(!entry || !entry.code || !entry.name || !entry.url){
+    return false;
+  }
+  
+  // Check if the code exists in current directory
   const current=t9DirectoryData.find(x=>x.code===entry.code);
   if(!current)return false;
+  
+  // Verify all key fields match
   return current.name===entry.name && current.url===entry.url && current.tone===entry.tone;
 }
 
 // Clean up directory to only show valid entries
 function cleanupDirectory(){
   const dir=JSON.parse(localStorage.getItem('t9directory')||'[]');
-  const validDir=dir.filter(entryIsValid);
+  const validDir=dir.filter(entry=>{
+    // Filter out any malformed or undefined entries
+    if(!entry || typeof entry !== 'object'){
+      return false;
+    }
+    return entryIsValid(entry);
+  });
   localStorage.setItem('t9directory',JSON.stringify(validDir));
   
   const unlocked=JSON.parse(localStorage.getItem('unlockedCodes')||"[]");
   const validCodes=unlocked.filter(code=>{
+    // Only keep codes that exist in current directory
+    if(!code || typeof code !== 'string'){
+      return false;
+    }
     const entry=t9DirectoryData.find(x=>x.code===code);
     return entry!==undefined;
   });
