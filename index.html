@@ -366,6 +366,13 @@ let mode=localStorage.getItem('t9mode')||'encode';
 display.value='';
 localStorage.removeItem('t9input');
 
+// One-time fix: Clear directory if it contains old Miss Monique entry with start time
+const dir=JSON.parse(localStorage.getItem('t9directory')||'[]');
+const oldMonique=dir.find(e=>e.code==="64776664783"&&e.start!==undefined);
+if(oldMonique){
+  localStorage.removeItem('t9directory');
+}
+
 const t9map={2:['A','B','C'],3:['D','E','F'],4:['G','H','I'],5:['J','K','L'],6:['M','N','O'],7:['P','Q','R','S'],8:['T','U','V'],9:['W','X','Y','Z']};
 const letterToNum={};
 for(const [num,letters] of Object.entries(t9map)){
