@@ -280,10 +280,13 @@ body::after{
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
-let player,audioCtx=null,loopEnabled=true,bgTone=null,currentToneFreq=null;
+let player,audioCtx=null,loopEnabled=true,bgTone=null,bgGain=null,currentToneFreq=null;
 let currentVideoId='p2ZdeIKJA8c';
-let isPlaying=false;
+let isMuted=false;
 let lastMatchedCode=null;
+let videoStartTime=null;
+
+const DEFAULT_VIDEO='p2ZdeIKJA8c'; // Ninajirachi - Infohazard
 
 function onYouTubeIframeAPIReady(){
   player=new YT.Player('ytplayer',{
@@ -295,45 +298,58 @@ function onYouTubeIframeAPIReady(){
 }
 
 function onPlayerReady(){
-  // Video ready but paused by default
+  // Video ready, waiting for user interaction
+  const wasMuted=localStorage.getItem('videoMuted')==='true';
+  isMuted=wasMuted;
+  if(isMuted){
+    player.mute();
+  }
 }
 
 function onPlayerStateChange(e){
   if(e.data===YT.PlayerState.PLAYING){
-    isPlaying=true;
-  }else if(e.data===YT.PlayerState.PAUSED||e.data===YT.PlayerState.ENDED){
-    isPlaying=false;
+    videoStartTime=Date.now();
   }
   if(e.data===YT.PlayerState.ENDED&&loopEnabled){
     player.playVideo();
   }
 }
 
-// Tap to play/pause
+// Tap to play/pause or mute/unmute
 document.getElementById('videoWrapper').onclick=function(){
-  if(isPlaying){
-    player.pauseVideo();
-  }else{
+  if(player.getPlayerState()===5||player.getPlayerState()===2||player.getPlayerState()===-1){
+    // Not started, paused, or unstarted - play it
     player.playVideo();
+  }else if(player.getPlayerState()===1){
+    // Playing - toggle mute
+    if(isMuted){
+      player.unMute();
+      isMuted=false;
+      localStorage.setItem('videoMuted','false');
+    }else{
+      player.mute();
+      isMuted=true;
+      localStorage.setItem('videoMuted','true');
+    }
   }
 };
 
 const t9DirectoryData=[
   {code:"456836926678837",name:"Ninajirachi · I Love My Computer",emoji:"🗼",color:"#b8d8ff",url:"https://4562.world",tone:128,youtube:"RKybAhTw8iE",note:"🗼 Dedicated to my computer and the Tower"},
-  {code:"627462",name:"Marina · Immortal",emoji:"🦋",color:"#b8a3ff",url:"https://key.plnt.earth",tone:333,youtube:"dYGKxxTXqSs",note:"🦋 you are"},
+  {code:"627462",name:"Marina · Immortal",emoji:"🦋",color:"#b8a3ff",url:"https://mirrorhoney.plnt.earth",tone:333,youtube:"dYGKxxTXqSs",note:"🦋 you are"},
   {code:"744743",name:"Sigrid · A Driver Saved My Night",emoji:"🪼",color:"#e9e7ff",url:"https://garlic.plnt.earth",tone:128,youtube:"sDEltzoEfZs",note:"🪼 keep driving"},
   {code:"32469",name:"Dagny · Brightsider",emoji:"🌸",color:"#f2b6d8",url:"https://dagny.plnt.earth",tone:272,youtube:"BskeuUMp_lo",note:"🌸 Green light on strawberry dreams"},
   {code:"536395",name:"Kendyl · Four",emoji:"🖋️",color:"#4a5568",url:"https://four.plnt.earth",tone:256,youtube:"XzOvgu3GPwY",note:"🖋️ writing in the margins"},
-  {code:"7227462",name:"Sabrina Carpenter",emoji:"🍯",color:"#f5cc6e",url:"https://honey.plnt.earth",tone:160},
-  {code:"274262",name:"Ariana Grande",emoji:"💨",color:"#eaeaea",url:"https://air.plnt.earth",tone:288},
-  {code:"3825472",name:"Dua Lipa",emoji:"🔥",color:"#e74b3c",url:"https://fire.plnt.earth",tone:216},
-  {code:"82956779438",name:"Taylor Swift",emoji:"📚",color:"#f6e7a5",url:"https://school.plnt.earth",tone:432},
-  {code:"64776664783",name:"Miss Monique",emoji:"🌊",color:"#55f6e6",url:"https://motion.plnt.earth",tone:512},
-  {code:"3632444",name:"Doechii",emoji:"💥",color:"#ff4d8a",url:"https://fire.plnt.earth",tone:320},
-  {code:"287672",name:"AURORA",emoji:"❄️",color:"#c3f0ff",url:"https://clarity.plnt.earth",tone:480},
-  {code:"868356",name:"Tove Lo",emoji:"💜",color:"#b03b6d",url:"https://dream.plnt.earth",tone:240},
-  {code:"7672542",name:"Rosalía",emoji:"🗡️",color:"#a0142b",url:"https://knife.plnt.earth",tone:333},
-  {code:"5467387",name:"Kim Petras",emoji:"🪞",color:"#ff91c8",url:"https://mirror.plnt.earth",tone:384}
+  {code:"7227462",name:"Sabrina Carpenter · We'll Be the Stars",emoji:"🍯",color:"#f5cc6e",url:"https://honey.plnt.earth",tone:160,youtube:"-bFZg_SMUhM",note:"⭐ stars are here"},
+  {code:"274262",name:"Ariana Grande · we can't be friends",emoji:"💨",color:"#eaeaea",url:"https://air.plnt.earth",tone:288,youtube:"KNtJGQkC-WI",note:"💨 you don't have to wait anymore"},
+  {code:"3825472",name:"Dua Lipa · New Rules",emoji:"🔥",color:"#e74b3c",url:"https://wonder.plnt.earth",tone:216,youtube:"k2qgadSvNyU",note:"🔥 ready to hallucinate"},
+  {code:"82956779438",name:"Taylor Swift · Blank Space",emoji:"📚",color:"#f6e7a5",url:"https://school.plnt.earth",tone:432,youtube:"e-ORhEE9VVg",note:"📚 your team your vibes, light it up"},
+  {code:"64776664783",name:"Miss Monique · Techno Code",emoji:"🌊",color:"#55f6e6",url:"https://fieldlab.plnt.earth",tone:512,youtube:"DdgyifI5k9o"},
+  {code:"3632444",name:"Doechii · Crazy",emoji:"💥",color:"#ff4d8a",url:"https://fire.plnt.earth",tone:320,youtube:"0aQ9Q0hRTwY",note:"💥 let's fucking go"},
+  {code:"287672",name:"AURORA · The Seed",emoji:"❄️",color:"#c3f0ff",url:"https://clarity.plnt.earth",tone:480,youtube:"_Mc_OM5oNA8",note:"❄️ feeding the world"},
+  {code:"868356",name:"Tove Lo · Grapefruit",emoji:"💜",color:"#b03b6d",url:"https://dream.plnt.earth",tone:240,youtube:"K52kfSE4N5U",note:"💜 she hasn't seen herself yet"},
+  {code:"7672542",name:"Rosalía · La Perla",emoji:"🗡️",color:"#a0142b",url:"https://knife.plnt.earth",tone:333,youtube:"GkTWxDB21cA",note:"🗡️ gastando plata ajena y mía"},
+  {code:"5467387",name:"Kim Petras · I Don't Want It at All",emoji:"🪞",color:"#ff91c8",url:"https://mirror.plnt.earth",tone:384,youtube:"JC9FA8lZRy8",note:"🪞 same page"}
 ];
 
 const display=document.getElementById('display');
@@ -415,7 +431,7 @@ function playDTMF(key){
   o2.frequency.value=f2;
   o1.type='sine';
   o2.type='sine';
-  g.gain.value=0.1;
+  g.gain.value=0.08;
   
   o1.connect(g);
   o2.connect(g);
@@ -433,14 +449,23 @@ function playBackgroundTone(freq){
   if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
   
   bgTone=audioCtx.createOscillator();
-  const g=audioCtx.createGain();
-  g.gain.value=0.04;
+  bgGain=audioCtx.createGain();
+  
+  // Start at 0 volume
+  bgGain.gain.value=0;
   bgTone.type="sine";
   bgTone.frequency.value=freq;
-  bgTone.connect(g);
-  g.connect(audioCtx.destination);
+  bgTone.connect(bgGain);
+  bgGain.connect(audioCtx.destination);
   bgTone.start();
   currentToneFreq=freq;
+  
+  // Fade in after 10 seconds if video is playing
+  setTimeout(()=>{
+    if(bgGain && videoStartTime && (Date.now()-videoStartTime)>=10000){
+      bgGain.gain.linearRampToValueAtTime(0.015,audioCtx.currentTime+3);
+    }
+  },10000);
 }
 
 function stopBackgroundTone(){
@@ -448,8 +473,12 @@ function stopBackgroundTone(){
     bgTone.stop();
     bgTone.disconnect();
     bgTone=null;
-    currentToneFreq=null;
   }
+  if(bgGain){
+    bgGain.disconnect();
+    bgGain=null;
+  }
+  currentToneFreq=null;
 }
 
 function updateModeText(){
@@ -463,9 +492,11 @@ function updateBreadcrumb(){
 function setVideo(videoId){
   if(currentVideoId===videoId)return;
   currentVideoId=videoId;
+  videoStartTime=null;
+  
   ytplayer.classList.add('fading');
   setTimeout(()=>{
-    ytplayer.src=`https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&enablejsapi=1`;
+    ytplayer.src=`https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&enablejsapi=1&mute=${isMuted?1:0}`;
     ytplayer.classList.remove('fading');
   },600);
 }
@@ -534,7 +565,7 @@ function translate(){
   
   // If we had a match and now don't, reset to infohazard
   if(lastMatchedCode!==null){
-    setVideo('p2ZdeIKJA8c');
+    setVideo(DEFAULT_VIDEO);
     lastMatchedCode=null;
   }
   
@@ -629,6 +660,7 @@ clearBtn.onclick=()=>{
   playDTMF('*');
   stopBackgroundTone();
   lastMatchedCode=null;
+  setVideo(DEFAULT_VIDEO);
 };
 
 copyBtn.onclick=()=>{
