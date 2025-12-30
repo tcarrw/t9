@@ -341,6 +341,755 @@ const t9DirectoryData=[
   {code:"274262",name:"Ariana Grande · we can't be friends",emoji:"💨",color:"#eaeaea",url:"https://air.plnt.earth",tone:288,youtube:"KNtJGQkC-WI",note:"💨 you don't have to wait anymore"},
   {code:"3825472",name:"Dua Lipa · New Rules",emoji:"🔥",color:"#e74b3c",url:"https://wonder.plnt.earth",tone:216,youtube:"k2qgadSvNyU",note:"🔥 ready to hallucinate"},
   {code:"82956779438",name:"Taylor Swift · Blank Space",emoji:"📚",color:"#f6e7a5",url:"https://school.plnt.earth",tone:432,youtube:"e-ORhEE9VVg",note:"📚 your team your vibes, light it up"},
+  {code:"64776664783",name:"Miss Monique · Techno Code",emoji:"🌊",color:"#55f6e6",url:"https://fieldlab.plnt.earth",tone:512,youtube:"DdgyifI5k9o",start:2975},
+  {code:"3632444",name:"Doechii · Crazy",emoji:"💥",color:"#ff4d8a",url:"https://fire.plnt.earth",tone:320,youtube:"0aQ9Q0hRTwY",note:"💥 let's fucking go"},
+  {code:"287672",name:"AURORA · The Seed",emoji:"❄️",color:"#c3f0ff",url:"https://clarity.plnt.earth",tone:480,youtube:"_Mc_OM5oNA8",note:"❄️ feeding the world"},
+  {code:"868356",name:"Tove Lo · Grapefruit",emoji:"💜",color:"#b03b6d",url:"https://dream.plnt.earth",tone:240,youtube:"K52kfSE4N5U",note:"💜 she hasn't seen herself yet"},
+  {code:"7672542",name:"Rosalía · La Perla",emoji:"🗡️",color:"#a0142b",url:"https://knife.plnt.earth",tone:333,youtube:"GkTWxDB21cA",note:"🗡️ gastando plata ajena y mía"},
+  {code:"5467387",name:"Kim Petras · I Don't Want It at All",emoji:"🪞",color:"#ff91c8",url:"https://mirror.plnt.earth",tone:384,youtube:"JC9FA8lZRy8",note:"🪞 same page"}
+];
+
+const display=document.getElementById('display');
+const output=document.getElementById('output');
+const breadcrumb=document.getElementById('breadcrumb');
+const modeToggle=document.getElementById('modeToggle');
+const clearBtn=document.getElementById('clearBtn');
+const undoBtn=document.getElementById('undoBtn');
+const copyBtn=document.getElementById('copyBtn');
+const pad=document.getElementById('pad');
+const header=document.getElementById('header');
+const ytplayer=document.getElementById('ytplayer');
+
+let mode=localStorage.getItem('t9mode')||'encode';
+
+// Clear input on page load - start fresh
+display.value='';
+localStorage.removeItem('t9input');
+
+const t9map={2:['A','B','C'],3:['D','E','F'],4:['G','H','I'],5:['J','K','L'],6:['M','N','O'],7:['P','Q','R','S'],8:['T','U','V'],9:['W','X','Y','Z']};
+const letterToNum={};
+for(const [num,letters] of Object.entries(t9map)){
+  for(const l of letters)letterToNum[l]=num;
+}
+
+// DTMF tone map - standard phone dual-tone frequencies
+const dtmfMap={
+  '1':[697,1209],'2':[697,1336],'3':[697,1477],
+  '4':[770,1209],'5':[770,1336],'6':[770,1477],
+  '7':[852,1209],'8':[852,1336],'9':[852,1477],
+  '*':[941,1209],'0':[941,1336],'#':[941,1477]
+};
+
+let lockedPaths=[];
+
+// Build keypad
+for(let i=1;i<=9;i++){
+  const b=document.createElement('button');
+  b.className='key';
+  const letters=t9map[i];
+  if(letters) b.innerHTML=`${i}<br><small>${letters.join('')}</small>`;
+  else b.textContent=i;
+  b.onclick=()=>{playDTMF(i.toString());display.value+=i;translate();};
+  pad.appendChild(b);
+}
+
+const bStar=document.createElement('button');
+bStar.className='key';
+bStar.innerHTML='*';
+bStar.onclick=()=>{playDTMF('*');display.value+='*';translate();};
+pad.appendChild(bStar);
+
+const bZero=document.createElement('button');
+bZero.className='key';
+bZero.innerHTML='0<br><small>SPACE</small>';
+bZero.onclick=()=>{playDTMF('0');display.value+='0';translate();};
+pad.appendChild(bZero);
+
+const bHash=document.createElement('button');
+bHash.className='key';
+bHash.innerHTML='#';
+bHash.onclick=()=>{playDTMF('#');display.value+='#';translate();};
+pad.appendChild(bHash);
+
+updateModeText();
+cleanupDirectory();
+translate();
+renderDirectory();
+renderHints();
+
+function playDTMF(key){
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  if(!dtmfMap[key])return;
+  
+  const[f1,f2]=dtmfMap[key];
+  const o1=audioCtx.createOscillator();
+  const o2=audioCtx.createOscillator();
+  const g=audioCtx.createGain();
+  
+  o1.frequency.value=f1;
+  o2.frequency.value=f2;
+  o1.type='sine';
+  o2.type='sine';
+  g.gain.value=0.08;
+  
+  o1.connect(g);
+  o2.connect(g);
+  g.connect(audioCtx.destination);
+  
+  o1.start();
+  o2.start();
+  o1.stop(audioCtx.currentTime+0.15);
+  o2.stop(audioCtx.currentTime+0.15);
+}
+
+function playBackgroundTone(freq){
+  if(currentToneFreq===freq)return;
+  stopBackgroundTone();
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  
+  bgTone=audioCtx.createOscillator();
+  bgGain=audioCtx.createGain();
+  
+  // Start at 0 volume
+  bgGain.gain.value=0;
+  bgTone.type="sine";
+  bgTone.frequency.value=freq;
+  bgTone.connect(bgGain);
+  bgGain.connect(audioCtx.destination);
+  bgTone.start();
+  currentToneFreq=freq;
+  
+  // Fade in after 10 seconds if video is playing
+  setTimeout(()=>{
+    if(bgGain && videoStartTime && (Date.now()-videoStartTime)>=10000){
+      bgGain.gain.linearRampToValueAtTime(0.015,audioCtx.currentTime+3);
+    }
+  },10000);
+}
+
+function stopBackgroundTone(){
+  if(bgTone){
+    bgTone.stop();
+    bgTone.disconnect();
+    bgTone=null;
+  }
+  if(bgGain){
+    bgGain.disconnect();
+    bgGain=null;
+  }
+  currentToneFreq=null;
+}
+
+function updateModeText(){
+  modeToggle.textContent='MODE: '+(mode==='encode'?'ENCODE':'DECODE');
+}
+
+function updateBreadcrumb(){
+  breadcrumb.textContent=lockedPaths.length?lockedPaths.join(' → '):'';
+}
+
+function setVideo(videoId, start){
+  currentVideoId=videoId;
+  videoStartTime=null;
+  
+  ytplayer.classList.add('fading');
+  setTimeout(()=>{
+    let url;
+    if(start){
+      // Minimal URL for start parameter
+      url=`https://www.youtube.com/embed/${videoId}?start=${start}&autoplay=1`;
+    }else{
+      url=`https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}`;
+    }
+    ytplayer.src=url;
+    ytplayer.classList.remove('fading');
+  },600);
+}
+
+// Check if stored entry matches current data
+function entryIsValid(entry){
+  // Check if entry has required fields
+  if(!entry || !entry.code || !entry.name || !entry.url){
+    return false;
+  }
+  
+  // Check if the code exists in current directory
+  const current=t9DirectoryData.find(x=>x.code===entry.code);
+  if(!current)return false;
+  
+  // Verify all key fields match
+  return current.name===entry.name && current.url===entry.url && current.tone===entry.tone;
+}
+
+// Clean up directory to only show valid entries
+function cleanupDirectory(){
+  const dir=JSON.parse(localStorage.getItem('t9directory')||'[]');
+  const validDir=dir.filter(entry=>{
+    // Filter out any malformed or undefined entries
+    if(!entry || typeof entry !== 'object'){
+      return false;
+    }
+    return entryIsValid(entry);
+  });
+  localStorage.setItem('t9directory',JSON.stringify(validDir));
+  
+  const unlocked=JSON.parse(localStorage.getItem('unlockedCodes')||"[]");
+  const validCodes=unlocked.filter(code=>{
+    // Only keep codes that exist in current directory
+    if(!code || typeof code !== 'string'){
+      return false;
+    }
+    const entry=t9DirectoryData.find(x=>x.code===code);
+    return entry!==undefined;
+  });
+  localStorage.setItem('unlockedCodes',JSON.stringify(validCodes));
+}
+
+function translate(){
+  const val=display.value.toUpperCase();
+  localStorage.setItem('t9input',display.value);
+  
+  const found=t9DirectoryData.find(x=>val===x.code);
+  if(found){
+    lastMatchedCode=val;
+    output.innerHTML=`<div style="color:${found.color};font-size:18px;font-weight:bold;">✨ ${found.code} → ${found.name}</div>`;
+    breadcrumb.textContent=found.note||'';
+    header.textContent=found.note||'T9 Signal Terminal · PLNT Earth';
+    updateDirectory(found);
+    unlock(found.code);
+    
+    if(found.youtube){
+      setVideo(found.youtube, found.start);
+    }
+    
+    if(found.tone){
+      playBackgroundTone(found.tone);
+    }
+    return;
+  }
+  
+  // If we had a match and now don't, reset to infohazard
+  if(lastMatchedCode!==null){
+    setVideo(DEFAULT_VIDEO);
+    lastMatchedCode=null;
+  }
+  
+  // If no match, stop tone
+  stopBackgroundTone();
+  if(val===''){
+    header.textContent='T9 Signal Terminal · PLNT Earth';
+    breadcrumb.textContent='';
+  }
+
+  if(mode==='encode'){
+    let res='';
+    for(const ch of val){
+      res+=letterToNum[ch]||ch;
+    }
+    output.textContent=res;
+    breadcrumb.textContent='';
+  }else{
+    let combos=[''];
+    for(const d of val){
+      const letters=t9map[d];
+      if(!letters){
+        for(let i in combos)combos[i]+=d;
+        continue;
+      }
+      const newC=[];
+      for(const p of combos){
+        for(const l of letters)newC.push(p+l);
+      }
+      combos=newC;
+      if(combos.length>5000)break;
+    }
+    if(lockedPaths.length>0)
+      combos=combos.filter(c=>c.startsWith(lockedPaths.join('')));
+    renderChoices(combos);
+    updateBreadcrumb();
+  }
+}
+
+function renderChoices(list){
+  output.innerHTML='';
+  if(list.length===0){
+    output.textContent='(no results)';
+    return;
+  }
+  for(const item of list.slice(0,80)){
+    const el=document.createElement('div');
+    el.className='choice';
+    el.textContent=item;
+    el.onclick=()=>selectChoice(item);
+    output.appendChild(el);
+  }
+}
+
+function selectChoice(c){
+  const p=lockedPaths.join('');
+  if(c.startsWith(p)){
+    const n=c[p.length];
+    if(n){
+      lockedPaths.push(n);
+      translate();
+    }
+  }
+}
+
+undoBtn.onclick=()=>{
+  lockedPaths.pop();
+  translate();
+};
+
+modeToggle.onclick=()=>{
+  mode=mode==='encode'?'decode':'encode';
+  localStorage.setItem('t9mode',mode);
+  lockedPaths=[];
+  breadcrumb.textContent='';
+  updateModeText();
+  translate();
+};
+
+display.oninput=()=>{
+  lockedPaths=[];
+  translate();
+};
+
+clearBtn.onclick=()=>{
+  display.value='';
+  output.textContent='';
+  lockedPaths=[];
+  breadcrumb.textContent='';
+  header.textContent='T9 Signal Terminal · PLNT Earth';
+  localStorage.removeItem('t9input');
+  playDTMF('*');
+  stopBackgroundTone();
+  lastMatchedCode=null;
+  setVideo(DEFAULT_VIDEO);
+};
+
+copyBtn.onclick=()=>{
+  let t='';
+  if(mode==='encode'){
+    t=output.textContent;
+  }else{
+    t=[...output.querySelectorAll('.choice')].map(c=>c.textContent).join(' ');
+  }
+  navigator.clipboard.writeText(t);
+  playDTMF('#');
+};
+
+function updateDirectory(found){
+  const dir=JSON.parse(localStorage.getItem('t9directory')||'[]');
+  const existingIndex=dir.findIndex(e=>e.code===found.code);
+  if(existingIndex>=0){
+    dir[existingIndex]=found;
+  }else{
+    dir.push(found);
+  }
+  localStorage.setItem('t9directory',JSON.stringify(dir));
+  renderDirectory();
+}
+
+function playVideoForEntry(entry){
+  if(entry.youtube){
+    setVideo(entry.youtube, entry.start);
+  }
+}
+
+function renderDirectory(){
+  const dir=JSON.parse(localStorage.getItem('t9directory')||'[]');
+  const c=document.getElementById('directory');
+  if(dir.length===0){
+    c.innerHTML='';
+    return;
+  }
+  c.innerHTML='<h3 style="margin:0 0 12px 0;color:var(--accent);font-size:16px;letter-spacing:1px;">DISCOVERED SIGNALS</h3>';
+  for(const e of dir){
+    const card=document.createElement('div');
+    card.className='entry';
+    card.style.borderColor=e.color;
+    card.onclick=()=>playVideoForEntry(e);
+    
+    // Use emoji from entry, or gift box if undefined
+    const displayEmoji = e.emoji || '🎁';
+    
+    card.innerHTML=`<strong style="color:${e.color}">${displayEmoji} ${e.name}</strong><br><span style="color:var(--accent2);font-size:13px;">${e.code}</span><br><a href="${e.url}" target="_blank" onclick="event.stopPropagation();">${e.url.replace('https://','')}</a><br><small style="color:var(--muted);">${e.tone} Hz</small>`;
+    c.appendChild(card);
+  }
+}
+
+function unlock(code){
+  let unlocked=JSON.parse(localStorage.getItem('unlockedCodes')||"[]");
+  if(!unlocked.includes(code)){
+    unlocked.push(code);
+    localStorage.setItem('unlockedCodes',JSON.stringify(unlocked));
+  }
+  renderHints();
+}
+
+function renderHints(){
+  const unlocked=JSON.parse(localStorage.getItem('unlockedCodes')||"[]");
+  const hints=t9DirectoryData.filter(d=>d.emoji);
+  const html=hints.map(h=>{
+    const open=unlocked.includes(h.code);
+    return `
+      <div class="hint ${open?'unlocked':''}">
+        <div class="emoji">${h.emoji}</div>
+        ${open?`<div class="details">
+          <div class="title">${h.name.split('·')[0].trim()}</div>
+          ${h.url?`<a href="${h.url}" target="_blank">↗ VISIT</a>`:''}
+        </div>`:''}
+      </div>`;
+  }).join('');
+  document.getElementById('hints').innerHTML=html;
+}
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>T9 Signal Terminal · PLNT Earth</title>
+<meta name="theme-color" content="#00e0c6">
+<style>
+:root{
+  --bg:#001616;
+  --panel:#0a2020;
+  --accent:#00e0c6;
+  --accent2:#5af;
+  --ink:#a8fff0;
+  --muted:#66b3a9;
+  --font:"VT323",monospace;
+}
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--font);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-height:100vh;
+  overflow-x:hidden;
+  padding:20px 12px;
+}
+header{
+  text-align:center;
+  padding:8px;
+  color:var(--accent);
+  font-size:24px;
+  letter-spacing:2px;
+  text-shadow:0 0 8px var(--accent2);
+  transition:all .6s ease;
+  margin-bottom:16px;
+}
+#videoWrapper{
+  position:relative;
+  width:100%;
+  max-width:480px;
+  aspect-ratio:16/9;
+  border:2px solid var(--accent2);
+  box-shadow:0 0 12px rgba(85,170,255,0.3);
+  margin-bottom:16px;
+  cursor:pointer;
+}
+iframe{width:100%;height:100%;border:0;opacity:1;transition:opacity 0.6s;}
+iframe.fading{opacity:0;}
+.window{
+  background:var(--panel);
+  border:2px solid var(--accent2);
+  box-shadow:0 0 16px rgba(0,0,0,0.5);
+  padding:20px;
+  max-width:480px;
+  width:100%;
+  margin-bottom:24px;
+}
+.display{
+  background:#000;
+  color:var(--ink);
+  padding:12px;
+  border:2px inset var(--accent2);
+  font-size:22px;
+  text-align:center;
+  width:100%;
+  letter-spacing:3px;
+  margin-bottom:12px;
+}
+#modeToggle{
+  width:100%;
+  background:var(--accent);
+  color:#001616;
+  border:2px outset var(--accent2);
+  font-family:var(--font);
+  font-size:18px;
+  padding:10px;
+  cursor:pointer;
+  margin-bottom:12px;
+  font-weight:bold;
+}
+#modeToggle:active{border:2px inset var(--accent2);}
+#breadcrumb{
+  font-size:18px;
+  color:var(--accent2);
+  text-align:center;
+  margin-bottom:12px;
+  min-height:24px;
+  letter-spacing:1px;
+}
+.keypad{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-bottom:12px;
+}
+button.key{
+  background:#1b1f1f;
+  border:2px outset var(--accent2);
+  color:var(--ink);
+  font-family:var(--font);
+  font-size:20px;
+  padding:16px 0;
+  cursor:pointer;
+  transition:all 0.1s;
+}
+button.key:active{
+  border:2px inset var(--accent2);
+  background:#003;
+  transform:scale(0.95);
+}
+button.key small{
+  display:block;
+  font-size:12px;
+  color:var(--muted);
+  margin-top:2px;
+}
+#output{
+  background:#000;
+  border:2px inset var(--accent2);
+  font-size:15px;
+  color:var(--accent2);
+  margin-bottom:12px;
+  text-align:center;
+  min-height:60px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  justify-content:center;
+  align-items:center;
+  padding:8px;
+}
+.choice{
+  background:#1b1f1f;
+  color:var(--ink);
+  padding:6px 10px;
+  border:1px solid var(--accent2);
+  cursor:pointer;
+  font-size:15px;
+  transition:all 0.2s;
+}
+.choice:hover{
+  background:var(--accent);
+  color:#001616;
+}
+.controls{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+.controls button{
+  background:#1b1f1f;
+  border:2px outset var(--accent2);
+  color:var(--ink);
+  font-family:var(--font);
+  font-size:16px;
+  padding:10px;
+  cursor:pointer;
+  transition:all 0.1s;
+}
+.controls button:active{
+  border:2px inset var(--accent2);
+  background:#003;
+}
+.hints{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(80px,1fr));
+  gap:16px;
+  margin:24px auto;
+  max-width:480px;
+  width:100%;
+}
+.hint{
+  text-align:center;
+  transition:all 0.4s ease;
+}
+.hint .emoji{
+  font-size:48px;
+  opacity:0.3;
+  filter:grayscale(100%);
+  transition:opacity .4s,filter .4s,text-shadow .4s;
+}
+.hint.unlocked .emoji{
+  opacity:1;
+  filter:none;
+  text-shadow:0 0 12px var(--accent2);
+}
+.details{
+  margin-top:8px;
+  font-size:13px;
+  color:var(--accent2);
+  animation:fadeIn .6s ease forwards;
+}
+.details .title{
+  font-weight:bold;
+  margin-bottom:4px;
+}
+.details a{
+  color:var(--accent);
+  text-decoration:none;
+  font-size:11px;
+}
+.details a:hover{text-decoration:underline;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px);}to{opacity:1;transform:none;}}
+#directory{
+  margin-top:16px;
+  padding:12px;
+  border:2px solid var(--accent2);
+  background:#000;
+}
+.entry{
+  border-left:4px solid var(--accent);
+  padding:10px 12px;
+  margin:10px 0;
+  text-align:left;
+  background:var(--panel);
+  cursor:pointer;
+  transition:background 0.2s;
+}
+.entry:hover{
+  background:#1b3333;
+}
+.entry strong{font-size:15px;}
+.entry a{color:var(--accent2);text-decoration:none;font-size:12px;}
+.entry a:hover{color:var(--accent);}
+footer{
+  text-align:center;
+  font-size:13px;
+  color:var(--muted);
+  margin-top:32px;
+  opacity:0.7;
+}
+footer a{
+  color:var(--accent);
+  text-decoration:none;
+}
+footer a:hover{
+  text-decoration:underline;
+}
+body::after{
+  content:"";
+  position:fixed;inset:0;
+  background:repeating-linear-gradient(transparent 0 1px,rgba(0,255,255,0.03) 1px 2px);
+  pointer-events:none;
+  animation:flicker 1.5s infinite;
+}
+@keyframes flicker{50%{opacity:0.95;}100%{opacity:1;}}
+</style>
+</head>
+<body>
+
+<header id="header">T9 Signal Terminal · PLNT Earth</header>
+
+<div id="videoWrapper">
+  <iframe id="ytplayer" src="https://www.youtube.com/embed/p2ZdeIKJA8c?autoplay=1&loop=1&playlist=p2ZdeIKJA8c&enablejsapi=1" 
+    allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>
+
+<div class="window">
+  <input class="display" id="display" placeholder="TYPE OR TAP">
+  <button id="modeToggle">MODE: ENCODE</button>
+  <div id="breadcrumb"></div>
+  <div class="keypad" id="pad"></div>
+  <div id="output"></div>
+  <div class="controls">
+    <button id="clearBtn">CLEAR</button>
+    <button id="undoBtn">UNDO</button>
+    <button id="copyBtn">COPY</button>
+  </div>
+  <div id="directory"></div>
+</div>
+
+<div id="hints" class="hints"></div>
+
+<footer>© PLNT Earth · <a href="https://earth.plnt.earth" target="_blank">earth.plnt.earth</a> · This page returns to ground</footer>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+let player,audioCtx=null,loopEnabled=true,bgTone=null,bgGain=null,currentToneFreq=null;
+let currentVideoId='p2ZdeIKJA8c';
+let isMuted=false;
+let lastMatchedCode=null;
+let videoStartTime=null;
+
+const DEFAULT_VIDEO='p2ZdeIKJA8c'; // Ninajirachi - Infohazard
+
+function onYouTubeIframeAPIReady(){
+  player=new YT.Player('ytplayer',{
+    events:{
+      'onReady':onPlayerReady,
+      'onStateChange':onPlayerStateChange
+    }
+  });
+}
+
+function onPlayerReady(){
+  // Video ready, waiting for user interaction
+  const wasMuted=localStorage.getItem('videoMuted')==='true';
+  isMuted=wasMuted;
+  if(isMuted){
+    player.mute();
+  }
+}
+
+function onPlayerStateChange(e){
+  if(e.data===YT.PlayerState.PLAYING){
+    videoStartTime=Date.now();
+  }
+}
+
+// Tap to play/pause or mute/unmute
+document.getElementById('videoWrapper').onclick=function(){
+  if(player.getPlayerState()===5||player.getPlayerState()===2||player.getPlayerState()===-1){
+    // Not started, paused, or unstarted - play it
+    player.playVideo();
+  }else if(player.getPlayerState()===1){
+    // Playing - toggle mute
+    if(isMuted){
+      player.unMute();
+      isMuted=false;
+      localStorage.setItem('videoMuted','false');
+    }else{
+      player.mute();
+      isMuted=true;
+      localStorage.setItem('videoMuted','true');
+    }
+  }
+};
+
+const t9DirectoryData=[
+  {code:"456836926678837",name:"Ninajirachi · I Love My Computer",emoji:"🗼",color:"#b8d8ff",url:"https://4562.world",tone:128,youtube:"RKybAhTw8iE",note:"🗼 Dedicated to my computer and the Tower"},
+  {code:"627462",name:"Marina · Immortal",emoji:"🦋",color:"#b8a3ff",url:"https://mirrorhoney.plnt.earth",tone:333,youtube:"dYGKxxTXqSs",note:"🦋 you are"},
+  {code:"744743",name:"Sigrid · A Driver Saved My Night",emoji:"🪼",color:"#e9e7ff",url:"https://garlic.plnt.earth",tone:128,youtube:"sDEltzoEfZs",note:"🪼 keep driving"},
+  {code:"32469",name:"Dagny · Brightsider",emoji:"🌸",color:"#f2b6d8",url:"https://dagny.plnt.earth",tone:272,youtube:"BskeuUMp_lo",note:"🌸 Green light on strawberry dreams"},
+  {code:"536395",name:"Kendyl · Four",emoji:"🖋️",color:"#4a5568",url:"https://four.plnt.earth",tone:256,youtube:"XzOvgu3GPwY",note:"🖋️ writing in the margins"},
+  {code:"7227462",name:"Sabrina Carpenter · We'll Be the Stars",emoji:"🍯",color:"#f5cc6e",url:"https://honey.plnt.earth",tone:160,youtube:"-bFZg_SMUhM",note:"⭐ stars are here"},
+  {code:"274262",name:"Ariana Grande · we can't be friends",emoji:"💨",color:"#eaeaea",url:"https://air.plnt.earth",tone:288,youtube:"KNtJGQkC-WI",note:"💨 you don't have to wait anymore"},
+  {code:"3825472",name:"Dua Lipa · New Rules",emoji:"🔥",color:"#e74b3c",url:"https://wonder.plnt.earth",tone:216,youtube:"k2qgadSvNyU",note:"🔥 ready to hallucinate"},
+  {code:"82956779438",name:"Taylor Swift · Blank Space",emoji:"📚",color:"#f6e7a5",url:"https://school.plnt.earth",tone:432,youtube:"e-ORhEE9VVg",note:"📚 your team your vibes, light it up"},
   {code:"64776664783",name:"Miss Monique · Techno Code",emoji:"🌊",color:"#55f6e6",url:"https://fieldlab.plnt.earth",tone:512,youtube:"DdgyifI5k9o",start:2975,noLoop:true},
   {code:"3632444",name:"Doechii · Crazy",emoji:"💥",color:"#ff4d8a",url:"https://fire.plnt.earth",tone:320,youtube:"0aQ9Q0hRTwY",note:"💥 let's fucking go"},
   {code:"287672",name:"AURORA · The Seed",emoji:"❄️",color:"#c3f0ff",url:"https://clarity.plnt.earth",tone:480,youtube:"_Mc_OM5oNA8",note:"❄️ feeding the world"},
